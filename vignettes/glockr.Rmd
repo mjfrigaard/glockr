@@ -207,7 +207,7 @@ ggplot(long, aes(x = n_lines, y = reorder(filename, n_lines), fill = type)) +
   theme(legend.position = "bottom")
 ```
 
-![](../man/figures/ggp2-lines-bar.png){width=700}
+![](https://raw.githubusercontent.com/mjfrigaard/glockr/refs/heads/main/man/figures/ggp2-lines-bar.png){width=700}
 
 ## Complexity metrics
 
