@@ -33,7 +33,9 @@
 #'   }
 #'
 #' @export
+#' 
 #' @examples
+#' 
 #' \dontrun{
 #' scc()               # current directory
 #' scc("~/myproject")  # a specific path

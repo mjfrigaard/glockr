@@ -22,6 +22,7 @@
 #'   }
 #'
 #' @export
+#' 
 #' @examples
 #' \dontrun{
 #' scc_by_file()

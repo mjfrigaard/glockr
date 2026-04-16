@@ -1,7 +1,9 @@
 #' Return the installed scc version string
 #'
 #' @return Character scalar, e.g. `"scc version 3.7.0"`.
+#' 
 #' @export
+#' 
 #' @examples
 #' \dontrun{
 #' scc_version()

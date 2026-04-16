@@ -2,7 +2,9 @@
 #'
 #' @return A [tibble::tibble()] with one row per language and columns
 #'   `language` and `extensions`.
+#'   
 #' @export
+#' 
 #' @examples
 #' \dontrun{
 #' scc_languages()

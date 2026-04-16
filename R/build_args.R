@@ -1,6 +1,40 @@
 #' Build the scc argument vector
 #'
-#' @keywords internal
+#' Translates R-level options into the character vector of CLI flags passed
+#' to `scc` via [processx::run()].
+#'
+#' @param sort Character. Column to sort by. One of `"name"`, `"files"`,
+#'   `"lines"`, `"code"`, `"comments"`, `"blanks"`, `"complexity"`.
+#' @param no_complexity Logical. Add `--no-complexity` flag when `TRUE`.
+#' @param no_duplicates Logical. Add `--no-duplicates` flag when `TRUE`.
+#' @param no_gen Logical. Add `--no-gen` flag when `TRUE`.
+#' @param include_ext Character vector of extensions to include, or `NULL`.
+#'   Multiple extensions are collapsed to a comma-separated string.
+#' @param exclude_ext Character vector of extensions to exclude, or `NULL`.
+#'   Multiple extensions are collapsed to a comma-separated string.
+#' @param not_match Character vector of regex patterns. Each becomes its own
+#'   `--not-match <pattern>` pair in the output, or `NULL` for none.
+#' @param by_file Logical. Add `--by-file` flag when `TRUE`.
+#'
+#' @return Character vector of CLI arguments, always starting with
+#'   `c("--format", "json", "--sort", <sort>)`.
+#'
+#' @examples
+#' \dontrun{
+#' # Default language-level summary
+#' build_args("code", FALSE, FALSE, FALSE, NULL, NULL, NULL, FALSE)
+#'
+#' # Per-file, R only, skip complexity
+#' build_args("lines",
+#'   no_complexity = TRUE,
+#'   no_duplicates = FALSE,
+#'   no_gen        = FALSE,
+#'   include_ext   = "r",
+#'   exclude_ext   = NULL,
+#'   not_match     = NULL,
+#'   by_file       = TRUE
+#' )
+#' }
 build_args <- function(
     sort,
     no_complexity,
