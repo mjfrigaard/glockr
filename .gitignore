@@ -15,8 +15,6 @@ src/*.so
 # devtools/roxygen2
 /doc/
 /Meta/
-man/
-NAMESPACE
 
 # R check output
 /*.Rcheck/
