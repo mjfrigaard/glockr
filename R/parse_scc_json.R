@@ -1,10 +1,25 @@
 #' Parse JSON output from scc into a tibble
 #'
-#' @param json_text Character scalar: raw stdout from scc.
-#' @param by_file Logical: was `--by-file` used?
-#' 
-#' @return A [tibble::tibble()].
-#' @keywords internal
+#' Converts the raw JSON written to stdout by `scc --format json` into a
+#' [tibble::tibble()]. Handles empty or blank output by returning a zero-row
+#' tibble with the correct column schema via [empty_scc_tibble()].
+#'
+#' @param json_text Character scalar: raw stdout captured from `scc`.
+#' @param by_file Logical. When `TRUE` unpacks the per-file `Files` array
+#'   inside each language block; when `FALSE` (default) returns one row per
+#'   language.
+#'
+#' @return A [tibble::tibble()]. Column layout matches [scc()] when
+#'   `by_file = FALSE` and [scc_by_file()] when `by_file = TRUE`.
+#'
+#' @examples
+#' \dontrun{
+#' json <- processx::run("scc", c("--format", "json", "."))$stdout
+#' parse_scc_json(json)
+#'
+#' json_by_file <- processx::run("scc", c("--format", "json", "--by-file", "."))$stdout
+#' parse_scc_json(json_by_file, by_file = TRUE)
+#' }
 parse_scc_json <- function(json_text, by_file = FALSE) {
   if (!nzchar(trimws(json_text))) return(empty_scc_tibble(by_file))
 

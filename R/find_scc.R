@@ -4,7 +4,11 @@
 #' informative error if it cannot be found.
 #'
 #' @return Invisible character string: the resolved path to `scc`.
-#' @keywords internal
+#'
+#' @examples
+#' \dontrun{
+#' find_scc()
+#' }
 find_scc <- function() {
   path <- Sys.which("scc")
   if (nchar(path) == 0L) {
