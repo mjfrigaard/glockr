@@ -3,6 +3,8 @@
 
 # glockr
 
+*A **g**o **l**anguage c**o**de **c**ounter pac**k**age in **r***
+
 <!-- badges: start -->
 
 <!-- badges: end -->
@@ -18,7 +20,7 @@ counter](https://github.com/boyter/scc) in an R package:
 
 This project was hugely inspired by the [`cloc` R
 package](https://github.com/hrbrmstr/cloc) by [boB
-Rudis](https://github.com/hrbrmstr)
+Rudis](https://github.com/hrbrmstr).
 
 ## Installation
 
@@ -32,10 +34,13 @@ pak::pak("mjfrigaard/glockr")
 
 ## Examples
 
+Below is an example using the popular [`dplyr`
+package](https://dplyr.tidyverse.org/).
+
 ``` r
 library(glockr)
 
-pkg_path <- system.file(package = "glockr")
+pkg_path <- system.file(package = "dplyr")
 ```
 
 ``` r
@@ -51,16 +56,15 @@ scc(pkg_path)
 ```
 
 ``` r
-#> # A tibble: 4 × 10
-#>   language files lines  code comments blanks
-#>   <chr>    <int> <int> <int>    <int>  <int>
-#> 1 R            4   644   534       26     84
-#> 2 CSS          1   130   106        0     24
-#> 3 HTML         1    33    29        0      4
-#> 4 License      1     2     2        0      0
-#> # ℹ 4 more variables: complexity <int>,
-#> #   weighted_complexity <int>, bytes <int>,
-#> #   uloc <int>
+# # A tibble: 6 × 10
+#   language files lines  code comments blanks complexity weighted_complexity  bytes  uloc
+#   <chr>    <int> <int> <int>    <int>  <int>      <int>               <dbl>  <int> <int>
+# 1 HTML        12  8905  8490       20    395          0                   0 625854     0
+# 2 Markdown     1  3611  2387        0   1224          0                   0 149198     0
+# 3 R           10  1561   853      401    307         29                   0  48968     0
+# 4 CSS          1   130   106        0     24          0                   0   1844     0
+# 5 SVG         10    10    10        0      0          0                   0   9687     0
+# 6 License      1     2     2        0      0          0                   0     43     0
 ```
 
 Filter to just the R source files for a tighter view:
@@ -71,13 +75,19 @@ r_files[, c("filename", "lines", "code", "comments", "blanks", "complexity")]
 ```
 
 ``` r
-#> # A tibble: 4 × 6
-#>   filename  lines  code comments blanks complexity
-#>   <chr>     <int> <int>    <int>  <int>      <int>
-#> 1 testthat…     4     3        0      1          0
-#> 2 test-par…   238   212        5     21         12
-#> 3 test-bui…   154   119        8     27         13
-#> 4 test-scc…   248   200       13     35         11
+# A tibble: 10 × 6
+#    filename             lines  code comments blanks complexity
+#    <chr>                <int> <int>    <int>  <int>      <int>
+#  1 dplyr.R                152    66       53     33          2
+#  2 colwise.R              173    96       43     34          0
+#  3 two-table.R             74    36       20     18          0
+#  4 window-functions.R     101    41       37     23          2
+#  5 in-packages.R           71    19       41     11          0
+#  6 grouping.R             143    81       29     33          2
+#  7 rowwise.R              203   112       50     41          2
+#  8 programming.R          189   124       35     30          6
+#  9 base.R                 164    83       40     41         10
+# 10 recoding-replacing.R   291   195       53     43          5
 ```
 
 `scc` estimates cyclomatic complexity by counting control-flow keywords
@@ -90,13 +100,19 @@ r_files[order(-r_files$complexity),
 ```
 
 ``` r
-#> # A tibble: 4 × 4
-#>   filename     code complexity weighted_complexity
-#>   <chr>       <int>      <int>               <int>
-#> 1 test-build…   119         13                   0
-#> 2 test-parse…   212         12                   0
-#> 3 test-scc.R    200         11                   0
-#> 4 testthat.R      3          0                   0
+# # A tibble: 10 × 4
+#    filename              code complexity weighted_complexity
+#    <chr>                <int>      <int>               <dbl>
+#  1 base.R                  83         10                   0
+#  2 programming.R          124          6                   0
+#  3 recoding-replacing.R   195          5                   0
+#  4 dplyr.R                 66          2                   0
+#  5 window-functions.R      41          2                   0
+#  6 grouping.R              81          2                   0
+#  7 rowwise.R              112          2                   0
+#  8 colwise.R               96          0                   0
+#  9 two-table.R             36          0                   0
+# 10 in-packages.R           19          0                   0
 ```
 
 `scc_languages()` returns every language `scc` recognizes, along with
@@ -106,6 +122,8 @@ the file extensions it maps to that language.
 langs <- scc_languages()
 nrow(langs)
 ```
+
+Number of languages:
 
 ``` r
 #> [1] 358
@@ -130,3 +148,5 @@ head(langs, 10)
 #>  9 Alloy        als            
 #> 10 Amber        ab
 ```
+
+Last published: 2026-04-16 14:50:42.937934
