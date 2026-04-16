@@ -16,6 +16,10 @@ counter](https://github.com/boyter/scc) in an R package:
 > complexity calculators and produce unique lines of code or DRYness
 > metrics. In short one tool to rule them all.*”
 
+This project was hugely inspired by the [`cloc` R
+package](https://github.com/hrbrmstr/cloc) by [boB
+Rudis](https://github.com/hrbrmstr)
+
 ## Installation
 
 You can install the development version of `glockr` from

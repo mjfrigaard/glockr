@@ -23,3 +23,6 @@ src/*.so
 # macOS
 .DS_Store
 docs
+
+/.quarto/
+**/*.quarto_ipynb

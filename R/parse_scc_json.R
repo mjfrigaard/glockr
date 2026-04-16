@@ -23,6 +23,11 @@
 parse_scc_json <- function(json_text, by_file = FALSE) {
   if (!nzchar(trimws(json_text))) return(empty_scc_tibble(by_file))
 
+  # scc --debug writes diagnostic lines (e.g. "DEBUG ...") to stdout; strip them
+  lines     <- strsplit(json_text, "\n", fixed = TRUE)[[1L]]
+  json_text <- paste(lines[!grepl("^(DEBUG|VERBOSE)\\s", lines)], collapse = "\n")
+  if (!nzchar(trimws(json_text))) return(empty_scc_tibble(by_file))
+
   raw <- jsonlite::fromJSON(json_text, simplifyVector = FALSE)
   if (length(raw) == 0L) return(empty_scc_tibble(by_file))
 
