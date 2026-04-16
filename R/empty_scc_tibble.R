@@ -20,7 +20,7 @@ empty_scc_tibble <- function(by_file = FALSE) {
       comments            = integer(),
       blanks              = integer(),
       complexity          = integer(),
-      weighted_complexity = integer(),
+      weighted_complexity = double(),
       bytes               = integer(),
       uloc                = integer()
     )
@@ -34,7 +34,7 @@ empty_scc_tibble <- function(by_file = FALSE) {
       comments            = integer(),
       blanks              = integer(),
       complexity          = integer(),
-      weighted_complexity = integer(),
+      weighted_complexity = double(),
       bytes               = integer(),
       generated           = logical(),
       minified            = logical()
