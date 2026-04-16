@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 
 # glockr
 
+*A **g**o **l**anguage c**o**de **c**ounter pac**k**age in **r***
+
 <!-- badges: start -->
 <!-- badges: end -->
 
