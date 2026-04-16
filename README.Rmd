@@ -36,6 +36,8 @@ pak::pak("mjfrigaard/glockr")
 
 ## Examples
 
+Below is an example using the popular [`dplyr` package](https://dplyr.tidyverse.org/). 
+
 ```{r example}
 library(glockr)
 
