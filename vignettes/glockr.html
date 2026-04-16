@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Getting Started with glockr</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with glockr</h1>
+
+
+
+<p><code>glockr</code> is an R wrapper around <a href="https://github.com/boyter/scc">scc</a> (Succinct Code Counter), a
+fast command-line tool that counts lines of code, comments, and blank
+lines across hundreds of languages. <code>scc</code> also computes
+cyclomatic complexity estimates, making it useful beyond simple line
+counting.</p>
+<p><code>scc</code> must be installed and on your <code>PATH</code>. See
+the <a href="https://github.com/boyter/scc/releases">scc releases
+page</a> for binaries.</p>
+<div id="functions" class="section level2">
+<h2>Functions</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>scc()</code></td>
+<td>Per-language summary for one or more paths</td>
+</tr>
+<tr class="even">
+<td><code>scc_by_file()</code></td>
+<td>Per-file breakdown for one or more paths</td>
+</tr>
+<tr class="odd">
+<td><code>scc_languages()</code></td>
+<td>All languages recognized by <code>scc</code></td>
+</tr>
+<tr class="even">
+<td><code>scc_version()</code></td>
+<td>Installed <code>scc</code> version string</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glockr)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">scc_version</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;scc version 3.7.0&quot;</span></span></code></pre></div>
+</div>
+<div id="counting-by-language" class="section level2">
+<h2>Counting by language</h2>
+<p><code>scc()</code> returns one row per language. Here we run it
+against the <code>glockr</code> package source itself.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">scc</span>(pkg_path)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 10</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt;   language files lines  code comments blanks</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;  &lt;int&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; 1 R            4   644   534       26     84</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 2 CSS          1   130   106        0     24</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 3 HTML         1    33    29        0      4</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 4 License      1     2     2        0      0</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more variables: complexity &lt;int&gt;,</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; #   weighted_complexity &lt;int&gt;, bytes &lt;int&gt;,</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; #   uloc &lt;int&gt;</span></span></code></pre></div>
+<p>Results are sorted by <code>code</code> lines by default. Change the
+order with <code>sort</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">scc</span>(pkg_path, <span class="at">sort =</span> <span class="st">&quot;files&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 10</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt;   language files lines  code comments blanks</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;  &lt;int&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; 1 R            4   644   534       26     84</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; 2 CSS          1   130   106        0     24</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 3 HTML         1    33    29        0      4</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 4 License      1     2     2        0      0</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more variables: complexity &lt;int&gt;,</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; #   weighted_complexity &lt;int&gt;, bytes &lt;int&gt;,</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; #   uloc &lt;int&gt;</span></span></code></pre></div>
+<div id="filtering-by-extension" class="section level3">
+<h3>Filtering by extension</h3>
+<p>Use <code>include_ext</code> to keep only certain file types.
+Extensions are case-insensitive and match without the leading dot.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">scc</span>(pkg_path, <span class="at">include_ext =</span> <span class="st">&quot;r&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 10</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt;   language files lines  code comments blanks</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;  &lt;int&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; 1 R            4   644   534       26     84</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more variables: complexity &lt;int&gt;,</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; #   weighted_complexity &lt;int&gt;, bytes &lt;int&gt;,</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; #   uloc &lt;int&gt;</span></span></code></pre></div>
+<p><code>exclude_ext</code> works the opposite way — exclude one or more
+extensions:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">scc</span>(pkg_path, <span class="at">exclude_ext =</span> <span class="st">&quot;r&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 10</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;   language files lines  code comments blanks</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;  &lt;int&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; 1 CSS          1   130   106        0     24</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 2 HTML         1    33    29        0      4</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 3 License      1     2     2        0      0</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more variables: complexity &lt;int&gt;,</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; #   weighted_complexity &lt;int&gt;, bytes &lt;int&gt;,</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; #   uloc &lt;int&gt;</span></span></code></pre></div>
+</div>
+<div id="skipping-complexity" class="section level3">
+<h3>Skipping complexity</h3>
+<p>Complexity calculation adds a small cost on large trees. Pass
+<code>no_complexity = TRUE</code> to skip it:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">scc</span>(pkg_path, <span class="at">no_complexity =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 10</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt;   language files lines  code comments blanks</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;  &lt;int&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; 1 R            4   644   534       26     84</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; 2 CSS          1   130   106        0     24</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; 3 HTML         1    33    29        0      4</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; 4 License      1     2     2        0      0</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more variables: complexity &lt;int&gt;,</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; #   weighted_complexity &lt;int&gt;, bytes &lt;int&gt;,</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; #   uloc &lt;int&gt;</span></span></code></pre></div>
+</div>
+</div>
+<div id="counting-by-file" class="section level2">
+<h2>Counting by file</h2>
+<p><code>scc_by_file()</code> expands results to one row per source
+file, adding <code>filename</code>, <code>location</code>, and logical
+flags for <code>generated</code> and <code>minified</code> files.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">scc_by_file</span>(pkg_path)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 7 × 12</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt;   language filename  location lines  code comments</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;    &lt;int&gt; &lt;int&gt;    &lt;int&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; 1 R        testthat… /Librar…     4     3        0</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; 2 R        test-bui… /Librar…   154   119        8</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; 3 R        test-par… /Librar…   238   212        5</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; 4 R        test-scc… /Librar…   248   200       13</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; 5 CSS      R.css     /Librar…   130   106        0</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; 6 HTML     00Index.… /Librar…    33    29        0</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; 7 License  LICENSE   /Librar…     2     2        0</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; # ℹ 6 more variables: blanks &lt;int&gt;,</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; #   complexity &lt;int&gt;, weighted_complexity &lt;int&gt;,</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; #   bytes &lt;int&gt;, generated &lt;lgl&gt;, minified &lt;lgl&gt;</span></span></code></pre></div>
+<p>Filter to just the R source files for a tighter view:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>r_files <span class="ot">&lt;-</span> <span class="fu">scc_by_file</span>(pkg_path, <span class="at">include_ext =</span> <span class="st">&quot;r&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>r_files[, <span class="fu">c</span>(<span class="st">&quot;filename&quot;</span>, <span class="st">&quot;lines&quot;</span>, <span class="st">&quot;code&quot;</span>, <span class="st">&quot;comments&quot;</span>, <span class="st">&quot;blanks&quot;</span>, <span class="st">&quot;complexity&quot;</span>)]</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 6</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;   filename  lines  code comments blanks complexity</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;     &lt;int&gt; &lt;int&gt;    &lt;int&gt;  &lt;int&gt;      &lt;int&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; 1 testthat…     4     3        0      1          0</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 2 test-par…   238   212        5     21         12</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 3 test-bui…   154   119        8     27         13</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 4 test-scc…   248   200       13     35         11</span></span></code></pre></div>
+</div>
+<div id="visualizing-file-composition" class="section level2">
+<h2>Visualizing file composition</h2>
+<p>With <code>ggplot2</code> and <code>tidyr</code> we can plot the code
+/ comment / blank split for each source file.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>long <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  r_files,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="at">cols      =</span> <span class="fu">c</span>(code, comments, blanks),</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  <span class="at">names_to  =</span> <span class="st">&quot;type&quot;</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>  <span class="at">values_to =</span> <span class="st">&quot;n_lines&quot;</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>)</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>long<span class="sc">$</span>type <span class="ot">&lt;-</span> <span class="fu">factor</span>(long<span class="sc">$</span>type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;blanks&quot;</span>, <span class="st">&quot;comments&quot;</span>, <span class="st">&quot;code&quot;</span>))</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="fu">ggplot</span>(long, <span class="fu">aes</span>(<span class="at">x =</span> n_lines, <span class="at">y =</span> <span class="fu">reorder</span>(filename, n_lines), <span class="at">fill =</span> type)) <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="at">code =</span> <span class="st">&quot;#2166ac&quot;</span>, <span class="at">comments =</span> <span class="st">&quot;#92c5de&quot;</span>, <span class="at">blanks =</span> <span class="st">&quot;#d1e5f0&quot;</span>),</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">c</span>(<span class="at">code =</span> <span class="st">&quot;Code&quot;</span>, <span class="at">comments =</span> <span class="st">&quot;Comments&quot;</span>, <span class="at">blanks =</span> <span class="st">&quot;Blanks&quot;</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">&quot;glockr R source — line composition&quot;</span>,</span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>    <span class="at">x     =</span> <span class="st">&quot;Lines&quot;</span>,</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>    <span class="at">y     =</span> <span class="cn">NULL</span>,</span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>    <span class="at">fill  =</span> <span class="cn">NULL</span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>) <span class="sc">+</span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;bottom&quot;</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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cezWr19vy5Yts3Xr1lm9evVcTvVoLlmyxJo0aWI1a9YMbq1gddGiRbbffvtZw4YNbe/evaYeyS1btrif0Lz+RpHb+Mv1uGLFCld+rVq1QhfHXO5natWqlV166aX+S9u0aZOdffbZNn/+fDvooIOCy3mCAAIIIIAAAghkS4AANI78+PHjXc/hqFGjbMyYMfbxxx/biBEj7IADDrB58+bZlVdeab169bKVK1fa1Vdfbc2bN3fP27RpY1dddZVNnjzZNmzYYBMnTrSLLroobE/RtlHZClivvfZaU6BboUIFO+yww1xZsZaHFRrlxbZt29zSBg0aRFn7/aJVq1Z9/yLNzxSMkxBAAAEEEEAgdwRCP/f9z2ktKykpSUsl1fFWo0aNmGURgMakMbviiits0qRJwcvoTz/9tA0fPtyOPPJIW7t2rQtAe/bsadOnT7e2bdvayJEjbdeuXfbII49YtWrVrG/fvm5dZPCpXUbbZuvWrfbYY49Z69at7aabbjL1kN544422evVqmzBhQtTl6m0NTXPmzLFhw4a5RQpa16xZY4MGDbL69euHZtvneeXKlfdZlq4FOg4SAggggAACCOSOQOjnvj6nFYRqWboCUHWixUsEoPF0QtbpMrwm+Lz66qs2depUt0aXtzXOsnPnzvbUU0/ZgAED7Nhjj3W9opFR/+uvv25z585123Xq1CnmNgogL7jgApdPE4fGjRvnnsda7laG/NKko969e9vmzZvtiSeesNNPP93OPffckBzRn9atWzf6ijQsVV1ICCCAAAIIIJA7AqGf++qwUgealqUrAC3tSAlASxMKWa+AUAGdP6P8zDPPtBYtWrgG02X2WbNm2TvvvGODBw+2hx56KGRLc93QGh+qpN5RBYrRtlGe0B7D5cuXW506ddzY0mjLIwNdnTwKiJU6dOjggmL1knbr1s0t4xcCCCCAAAIIIJBtgfj9o9muXZb37wea+lagSUi6nZECQj1qEpJmmO/Zs8deeeUVu/vuu92l+euuu840EUiTl3QbJI3lVFLPqGbU6+eII46Iuc0JJ5xg7777rit3586dNmTIENNkqFjLdXleP9FSo0aN3PhR1U2X4kkIIIAAAggggEAuCBCAxmmFihUrWseOHe2MM85wYz41lvPRRx91vYrXXHONnX/++abJPT/96U/d7PQLL7zQ+vXr53o3u3Tp4saF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LUj9EUAgIYFZs2bZf//7X5e3YsWK1rp1azvqqKOsVq1abtm0adOsTp06duihhyZUXmSmZ555xk477TRXRuS6fHu9ePFie+utt2z16tXWs2dPa9euXV4cwrZt26x69ep5Uddoldy8ebPpPPzf//5nXbt2tZ/85CdWqVJyH9NfffWVLViwwLp16xZtFyxDIGcE6AHNmaagIgggUJ4Cr7zyio0dO9Zmzpxp//73v23kyJHWpUsXW7t2rdutAsjXX3+9zFW48cYbbeXKlWXePlc2/Otf/2qdO3e2d99919mcddZZdvnll+dK9WLWY9euXdahQ4eY63N9xaJFi+zHP/6xPfDAA7Z3714bN26c/fCHP7RNmzYlVXV9yXr44YeT2obMCGRDgAA0G+rsEwEEsiKgHs8//vGP9vjjj9s777xjjRs3thdffDFqXVasWGGzZ88OCwDUQ7Vjxw637PPPP7fdu3dH3VY9cX5gq8Dok08+saVLl0bNm0sLP/roI7v00ktd7+djjz1md9xxh73//vv2z3/+0wWkfl137txpc+fONR2bn3ybjRs3mnrh/KTeuO3bt/svbc2a7/4RgQKuUKP58+cH8/hP1AMb6ezvR4FZ6DrlXbhwoa1atcrf3L7++mubN29ezHYKZsyBJ927d3eB/pQpU+yWW25x56V6QW+++eaw2n355Zcm48ik83XZsmWRi539p59+GnWbfTKzAIEMCiTXt5/BirErBBBAoDwFNmzY4HosDzrooLDdKKg855xz7JtvvrEGDRrYjBkzbMKECe7y+q233uqCms8++8zq1q1rCoY++OCDsMvu2u7kk0+2O++804455hj72c9+ZgceeKB9++231r59e1MPY66mqVOn2nnnnWcHH3xwsIr169d3Qdx+++3nll1//fX2wgsvWKNGjWzJkiX20ksvuZ5H2SiIVBCkYFDBkywVGCkQnDhxoh177LF22GGH2XHHHefy6VKztnv66aedoYJK9VBriMRNN91kTz75pKl9NCTg1VdfdUMBYrXBqFGjXM9h//79TUHcL37xCxcIqw0VmL722mvWqlWr4HHl0hMFlQqcr7nmmrBq6YuSLJQmT57sglG5y23MmDF22WWXuXUDBw50vfc1a9Z0ji1atHDL33zzTevXr59rH325UK/qRRdd5NbxC4FsC9ADmu0WYP8IIJAxAQVOBxxwgO2///7WpEkTFyQdffTRYfufM2eOKdjSh7wuyas3avz48cE8CrK++OILF5jWrl3bBTb+SgWZPXr0sN///vcukHv55ZddwKVHBQAtW7Z0QaufP9ceP/zww7Dg06+fH3zK729/+5t9/PHHbhiDAqb77rvPz+Z6hhWw6+e5555zFu+9955dd911YYG3AlD1QP/ud79zvhpvqrGPGo+rRwVjf/nLX0y9pNr+N7/5Tdhl5WhtIHMFaxpqoUBWgbGGESioVtCcyz3Qctc425KSkqClnmg8a5UqVWzLli2mwFqX52WlHvXbb7/d9UCrB19GCmLV06kA1U+jR492jm+88Ybrsb7rrrssEAj4q3lEIKsCBKBZ5WfnCCCQSQFNzNAHuIIffSirJ1M9SaFJk5BuuOEG11v0y1/+0h555BHTJXU/aVKOHyioZzN0jF6fPn2scuXK1qtXL5ddl1XVQ9qxY0cbMWKE/epXvwpOevLLy6VHBS/qvYyV/vOf/7hjq1Gjhsui3tJ//OMfwUvxCixlo3IUnCsYV2revLnrxXQvvF+aXKOkLwOdOnWyhg0butfKp17V559/3gVegwcPtgsvvND1fmo/fvAUrw1UUL169eyUU05xE81kri8bkV803A5z5JeGgsRz15eiatWq2QknnOBqrC9QGh+qc1jnl85rBaoVKlQInnsK4jV8Ql+eZKgxyuvWrbPp06fnyFFTjWIXIAAt9jOA40egiAR0iVKXYdu0aeMuA1911VUugAolUICqD3QFUkOGDHHBaOh6XZL2kz7w/aBIyx566CEX7KinSam1N9Ne4yHvvvtu9+GvIEi9h7majjjiiKgByoABA+ypp55yPbga/+knje3UmFj/MrF/RwF/vYKmaCk0X7RZ6zJt27atG4+qManqQVWPqp/itYGf5+9//7v7oqFL+L/+9a/dpDN/Xa49Hn744W6YQuQkNg1bUJCvwHzPnj1uiIFf961bt7ohDgo8Q8fY6guQn7ROl+dlqB9dxo8ccuLn5RGBTAsQgGZanP0hgEBOCGgCjIKUyJnT6uXTGM5rr73WjjzySNPl89DJNvEqr/GNjz76qOs91WVSBW2aQa7yFJxqbKXGI+Zq6tu3ry1fvtz1CivQ1BhO3R1Al7HPOOMM6927t+uN9Cf6qHdNdxJQIJ7OpP1oyIK+KGgsqS4v6w4Gfs9ztH0p2FJSvTXu9Ec/+pEbaqFJPGoDTUbK1aSAWl92FGz6k7TUO69xsBdccIELQHXuaGyrki6160dfGNQrqvGxOp/VXuopVlIvtCbdaRiDDNVrqt5g5SEhkAsCTELKhVagDgggkBEBTSZSQKWkD/0TTzzRjdcM3bkuu5955pl2/PHHu9495dEs8ESTgqbhw4e7y55vv/22Pfvss24cqHqpdJsd/7J0ouVlMp8um0+aNMn1GPpjOxVUy0yTrvSjSSzqnWzWrJkbK5uMTaLHokvy+gKgy8z60b0w//SnP8XdXL2wGgKgeml2vAI3BWi6t6vGUIb2oMYtKEsrFWCrp1Z1Vm+nxt2q1/LnP/+5q5HuSKCJVZqEpUvpOq/UM6ofBdj6IqXe5NAvVBr2oS8VGmurWztpzG7Tpk2zdITsFoFwgRLvUgcjksNNeIUAAuUoMH3hd7fhSfcuurZukNYi1ROlIDVer1uiO9TlUv2p1RCARNLIqXMSyZZUnuE9Dkkqv3rKVG8FcJFJvYxap4C0PJPqoDG2GtOZaFK9/DGqMlfPoGbCJ5panv14olkTzrf4nxcnnFcZVefQYQahG6v3OXSikb9OQyHkFe0ci7WNvy2PCGRDgB7QbKizTwQQyHmBZIKW0g7GD4hKy5dL69XrGC34VB11udu/5F2edVYdkgk+VZdQa315SGc7luexhpYdK/hUnmjBp5ZXrVrV/eh5ZIq1TWQ+XiOQSYH0DtzJZM3ZFwIIIIAAAggggEBeChCA5mWzUWkEEEAAAQQQQCB/BQhA87ftqDkCCCCAAAIIIJCXAkxCystmo9IIIIAAAggggED+CtADmr9tR80RQAABBBBAAIG8FCAAzctmo9IIIIAAAggggED+ChCA5m/bUXMEEEAAAQQQQCAvBQhA87LZqDQCCCCAAAIIIJC/AgSg+dt21BwBBBBAAAEEEMhLAQLQvGw2Ko0AAggggAACCOSvAAFo/rYdNUcAAQQQQAABBPJSgAA0L5uNSiOAAAIIIIAAAvkrQACav21HzRFAAAEEEEAAgbwUIADNy2aj0ggggAACCCCAQP4KEIDmb9tRcwQQQAABBBBAIC8FCEDzstmoNAIIIIAAAgggkL8CBKD523bUHAEEEEAAAQQQyEsBAtC8bDYqjQACCCCAAAII5K8AAWj+th01RwABBBBAAAEE8lLg/wAHM/llLFLokwAAAABJRU5ErkJggg==" /><!-- --></p>
+</div>
+<div id="complexity-metrics" class="section level2">
+<h2>Complexity metrics</h2>
+<p><code>scc</code> estimates cyclomatic complexity by counting
+control-flow keywords (<code>if</code>, <code>for</code>,
+<code>while</code>, etc.). The <code>complexity</code> column is the raw
+total; <code>weighted_complexity</code> divides by lines of code to give
+a per-line rate.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>r_files[<span class="fu">order</span>(<span class="sc">-</span>r_files<span class="sc">$</span>complexity),</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>        <span class="fu">c</span>(<span class="st">&quot;filename&quot;</span>, <span class="st">&quot;code&quot;</span>, <span class="st">&quot;complexity&quot;</span>, <span class="st">&quot;weighted_complexity&quot;</span>)]</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 4</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt;   filename     code complexity weighted_complexity</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;       &lt;int&gt;      &lt;int&gt;               &lt;int&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; 1 test-build…   119         13                   0</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; 2 test-parse…   212         12                   0</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; 3 test-scc.R    200         11                   0</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; 4 testthat.R      3          0                   0</span></span></code></pre></div>
+</div>
+<div id="analysing-multiple-paths" class="section level2">
+<h2>Analysing multiple paths</h2>
+<p>Both <code>scc()</code> and <code>scc_by_file()</code> accept a
+character vector of paths, so you can compare directories side by
+side:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">scc</span>(<span class="fu">c</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="fu">file.path</span>(pkg_path, <span class="st">&quot;R&quot;</span>),</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="fu">file.path</span>(pkg_path, <span class="st">&quot;tests&quot;</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>))</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 10</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt;   language files lines  code comments blanks</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;int&gt;  &lt;int&gt;</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; 1 R            4   644   534       26     84</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more variables: complexity &lt;int&gt;,</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; #   weighted_complexity &lt;int&gt;, bytes &lt;int&gt;,</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; #   uloc &lt;int&gt;</span></span></code></pre></div>
+</div>
+<div id="supported-languages" class="section level2">
+<h2>Supported languages</h2>
+<p><code>scc_languages()</code> returns every language <code>scc</code>
+recognises, along with the file extensions it maps to that language.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>langs <span class="ot">&lt;-</span> <span class="fu">scc_languages</span>()</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">nrow</span>(langs)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; [1] 358</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="fu">head</span>(langs, <span class="dv">10</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt; # A tibble: 10 × 2</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt;    language     extensions     </span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;        &lt;chr&gt;          </span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt;  1 ABAP         abap           </span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt;  2 ABNF         abnf           </span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt;  3 ActionScript as             </span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt;  4 Ada          ada,adb,ads,pad</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt;  5 Agda         agda           </span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="co">#&gt;  6 Alchemist    crn            </span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="co">#&gt;  7 Alex         x              </span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="co">#&gt;  8 Algol 68     a68            </span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co">#&gt;  9 Alloy        als            </span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt; 10 Amber        ab</span></span></code></pre></div>
+<p>Search for a specific language:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>langs[<span class="fu">grepl</span>(<span class="st">&quot;^R$&quot;</span>, langs<span class="sc">$</span>language), ]</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 2</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt;   language extensions</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;    &lt;chr&gt;     </span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt; 1 R        r</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
