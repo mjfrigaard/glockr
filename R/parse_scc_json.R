@@ -36,7 +36,7 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
         comments            = lang$Comment,
         blanks              = lang$Blank,
         complexity          = lang$Complexity,
-        weighted_complexity = lang$WeightedComplexity,
+        weighted_complexity = round(as.double(lang$WeightedComplexity), 2),
         bytes               = lang$Bytes,
         uloc                = lang$ULOC %||% 0L
       )
@@ -57,7 +57,7 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
           comments            = f$Comment,
           blanks              = f$Blank,
           complexity          = f$Complexity,
-          weighted_complexity = f$WeightedComplexity,
+          weighted_complexity = round(as.double(f$WeightedComplexity), 2),
           bytes               = f$Bytes,
           generated           = isTRUE(f$Generated),
           minified            = isTRUE(f$Minified)
