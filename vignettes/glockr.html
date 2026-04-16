@@ -480,9 +480,9 @@ flags for <code>generated</code> and <code>minified</code> files.</p>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;   filename  lines  code comments blanks complexity</span></span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;     &lt;int&gt; &lt;int&gt;    &lt;int&gt;  &lt;int&gt;      &lt;int&gt;</span></span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; 1 testthat…     4     3        0      1          0</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 2 test-par…   238   212        5     21         12</span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 3 test-bui…   154   119        8     27         13</span></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 4 test-scc…   248   200       13     35         11</span></span></code></pre></div>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; 2 test-bui…   154   119        8     27         13</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 3 test-scc…   248   200       13     35         11</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 4 test-par…   238   212        5     21         12</span></span></code></pre></div>
 </div>
 <div id="visualizing-file-composition" class="section level2">
 <h2>Visualizing file composition</h2>
@@ -552,7 +552,7 @@ side:</p>
 <div id="supported-languages" class="section level2">
 <h2>Supported languages</h2>
 <p><code>scc_languages()</code> returns every language <code>scc</code>
-recognises, along with the file extensions it maps to that language.</p>
+recognizes, along with the file extensions it maps to that language.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>langs <span class="ot">&lt;-</span> <span class="fu">scc_languages</span>()</span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">nrow</span>(langs)</span>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; [1] 358</span></span>
