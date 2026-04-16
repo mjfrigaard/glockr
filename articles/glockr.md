@@ -1,0 +1,544 @@
+# Getting Started with glockr
+
+`glockr` is an R wrapper around [scc](https://github.com/boyter/scc)
+(Succinct Code Counter), a fast command-line tool that counts lines of
+code, comments, and blank lines across hundreds of languages. `scc` also
+computes cyclomatic complexity estimates, making it useful beyond simple
+line counting.
+
+`scc` must be installed and on your `PATH`. See the [scc releases
+page](https://github.com/boyter/scc/releases) for binaries.
+
+## Functions
+
+| Function                                                                            | Description                                |
+|-------------------------------------------------------------------------------------|--------------------------------------------|
+| [`scc()`](https://mjfrigaard.github.io/glockr/reference/scc.md)                     | Per-language summary for one or more paths |
+| [`scc_by_file()`](https://mjfrigaard.github.io/glockr/reference/scc_by_file.md)     | Per-file breakdown for one or more paths   |
+| [`scc_languages()`](https://mjfrigaard.github.io/glockr/reference/scc_languages.md) | All languages recognized by `scc`          |
+| [`scc_version()`](https://mjfrigaard.github.io/glockr/reference/scc_version.md)     | Installed `scc` version string             |
+
+## Setup
+
+``` r
+library(glockr)
+```
+
+``` r
+scc_version()
+#> [1] "scc version 3.7.0"
+```
+
+## Counting by language
+
+[`scc()`](https://mjfrigaard.github.io/glockr/reference/scc.md) returns
+one row per language. Here we run it against the `glockr` package source
+itself.
+
+``` r
+scc(pkg_path)
+#> # A tibble: 4 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> 2 CSS          1   130   106        0     24
+#> 3 HTML         1    41    37        0      4
+#> 4 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+Results are sorted by `code` lines by default. Change the order with
+`sort`:
+
+``` r
+scc(pkg_path, sort = "files")
+#> # A tibble: 4 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> 2 CSS          1   130   106        0     24
+#> 3 HTML         1    41    37        0      4
+#> 4 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+Valid `sort` values are: `"name"`, `"files"`, `"lines"`, `"code"`,
+`"comments"`, `"blanks"`, `"complexity"`.
+
+### Filtering by extension
+
+Use `include_ext` to keep only certain file types. Extensions are
+case-insensitive and match without the leading dot.
+
+``` r
+scc(pkg_path, include_ext = "r")
+#> # A tibble: 1 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+`exclude_ext` works the opposite way — exclude one or more extensions:
+
+``` r
+scc(pkg_path, exclude_ext = "r")
+#> # A tibble: 3 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 CSS          1   130   106        0     24
+#> 2 HTML         1    41    37        0      4
+#> 3 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+Pass a character vector to filter on multiple extensions at once:
+
+``` r
+scc(pkg_path, include_ext = c("r", "css"))
+#> # A tibble: 2 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> 2 CSS          1   130   106        0     24
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+### Skipping complexity
+
+Complexity calculation adds a small cost on large trees. Pass
+`no_complexity = TRUE` to skip it:
+
+``` r
+scc(pkg_path, no_complexity = TRUE)
+#> # A tibble: 4 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> 2 CSS          1   130   106        0     24
+#> 3 HTML         1    41    37        0      4
+#> 4 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+## Counting by file
+
+[`scc_by_file()`](https://mjfrigaard.github.io/glockr/reference/scc_by_file.md)
+expands results to one row per source file, adding `filename`,
+`location`, and logical flags for `generated` and `minified` files.
+
+``` r
+scc_by_file(pkg_path)
+#> # A tibble: 7 × 12
+#>   language filename  location lines  code comments
+#>   <chr>    <chr>     <chr>    <int> <int>    <int>
+#> 1 R        testthat… /Librar…     4     3        0
+#> 2 R        test-bui… /Librar…   154   119        8
+#> 3 R        test-par… /Librar…   238   212        5
+#> 4 R        test-scc… /Librar…   248   200       13
+#> 5 CSS      R.css     /Librar…   130   106        0
+#> 6 HTML     00Index.… /Librar…    41    37        0
+#> 7 License  LICENSE   /Librar…     2     2        0
+#> # ℹ 6 more variables: blanks <int>,
+#> #   complexity <int>, weighted_complexity <dbl>,
+#> #   bytes <int>, generated <lgl>, minified <lgl>
+```
+
+Filter to just the R source files for a tighter view:
+
+``` r
+r_files <- scc_by_file(pkg_path, include_ext = "r")
+r_files[, c("filename", "lines", "code", "comments", "blanks", "complexity")]
+#> # A tibble: 4 × 6
+#>   filename  lines  code comments blanks complexity
+#>   <chr>     <int> <int>    <int>  <int>      <int>
+#> 1 testthat…     4     3        0      1          0
+#> 2 test-bui…   154   119        8     27         13
+#> 3 test-par…   238   212        5     21         12
+#> 4 test-scc…   248   200       13     35         11
+```
+
+## Visualizing file composition
+
+With `ggplot2` and `tidyr` we can plot the code / comment / blank split
+for each source file.
+
+``` r
+library(ggplot2)
+library(tidyr)
+
+long <- pivot_longer(
+  r_files,
+  cols      = c(code, comments, blanks),
+  names_to  = "type",
+  values_to = "n_lines"
+)
+long$type <- factor(long$type, levels = c("blanks", "comments", "code"))
+
+ggplot(long, aes(x = n_lines, y = reorder(filename, n_lines), fill = type)) +
+  geom_col() +
+  scale_fill_manual(
+    values = c(code = "#2166ac", comments = "#92c5de", blanks = "#d1e5f0"),
+    labels = c(code = "Code", comments = "Comments", blanks = "Blanks")
+  ) +
+  labs(
+    title = "glockr R source — line composition",
+    x     = "Lines",
+    y     = NULL,
+    fill  = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+![Stacked bar chart showing code, comment, and blank line counts for
+each R source file in
+glockr.](https://raw.githubusercontent.com/mjfrigaard/glockr/refs/heads/main/man/figures/ggp2-lines-bar.png)
+
+Stacked bar chart showing code, comment, and blank line counts for each
+R source file in glockr.
+
+## Complexity metrics
+
+`scc` estimates cyclomatic complexity by counting control-flow keywords
+(`if`, `for`, `while`, etc.). The `complexity` column is the raw total;
+`weighted_complexity` is a `double` rounded to two decimal places.
+
+``` r
+r_files[order(-r_files$complexity),
+        c("filename", "code", "complexity", "weighted_complexity")]
+#> # A tibble: 4 × 4
+#>   filename     code complexity weighted_complexity
+#>   <chr>       <int>      <int>               <dbl>
+#> 1 test-build…   119         13                0.11
+#> 2 test-parse…   212         12                0.06
+#> 3 test-scc.R    200         11                0.06
+#> 4 testthat.R      3          0                0
+```
+
+## Unique lines of code
+
+`uloc = TRUE` asks `scc` to count *unique* lines of code (ULOC) — the
+number of distinct non-blank, non-comment lines. `dryness = TRUE` also
+computes ULOC and additionally prints a DRYness score in the console (it
+has no extra effect on the returned tibble).
+
+``` r
+scc(pkg_path, uloc = TRUE)
+#> # A tibble: 4 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> 2 CSS          1   130   106        0     24
+#> 3 HTML         1    41    37        0      4
+#> 4 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+## Generated and minified files
+
+`scc` can detect files that were auto-generated or minified. Detection
+is **opt-in**: pass `gen = TRUE` to identify generated files and
+`min = TRUE` to identify minified files. Use `min_gen = TRUE` (`-z`) to
+enable both at once.
+
+``` r
+# identify generated files; generated column reflects detection
+scc_by_file(pkg_path, gen = TRUE)[, c("filename", "generated", "minified")]
+#> # A tibble: 7 × 3
+#>   filename                 generated minified
+#>   <chr>                    <lgl>     <lgl>
+#> 1 testthat.R               FALSE     FALSE
+#> 2 test-build_args.R        FALSE     FALSE
+#> 3 test-parse_scc_json.R    FALSE     FALSE
+#> 4 test-scc.R               FALSE     FALSE
+#> 5 R.css                    FALSE     FALSE
+#> 6 00Index.html             FALSE     FALSE
+#> 7 LICENSE                  FALSE     FALSE
+```
+
+### Excluding generated or minified files
+
+`no_gen = TRUE` (implies `gen = TRUE`) detects generated files and drops
+them from the results. `no_min = TRUE` does the same for minified files.
+`no_min_gen = TRUE` removes both in one pass.
+
+``` r
+scc(pkg_path, no_gen  = TRUE)   # drop generated files
+scc(pkg_path, no_min  = TRUE)   # drop minified files
+scc(pkg_path, no_min_gen = TRUE) # drop both
+```
+
+### Custom generation markers
+
+By default `scc` looks for `"do not edit"` and `"<auto-generated />"` in
+the first lines of a file. Override with `generated_markers`:
+
+``` r
+scc(pkg_path,
+    no_gen = TRUE,
+    generated_markers = c("GENERATED", "AUTO_BUILT"))
+```
+
+### Minified-line threshold
+
+A file is considered minified when its average bytes per line exceeds a
+threshold (default 255). Lower it to catch less-aggressively minified
+files:
+
+``` r
+scc(pkg_path, no_min = TRUE, min_gen_line_length = 100L)
+```
+
+## Duplicate detection
+
+`no_duplicates = TRUE` removes files whose content is identical to
+another file already counted, keeping only one copy in the totals.
+
+``` r
+scc(pkg_path, no_duplicates = TRUE)
+```
+
+## Excluding files and directories
+
+### By directory name
+
+`exclude_dir` takes a character vector of directory *names* (not full
+paths) to skip entirely. The scc defaults (`.git`, `.hg`, `.svn`) are
+always applied; this extends them.
+
+``` r
+scc(pkg_path, exclude_dir = c("tests", "vignettes"))
+#> # A tibble: 4 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> 2 CSS          1   130   106        0     24
+#> 3 HTML         1    41    37        0      4
+#> 4 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+### By file name
+
+`exclude_file` skips files whose *name* (not full path) matches any
+element:
+
+``` r
+scc(pkg_path, exclude_file = c("LICENSE", "testthat.R"))
+```
+
+### By path pattern
+
+`not_match` accepts a character vector of regex patterns. Any file whose
+full path matches is excluded. Each element becomes a separate
+`--not-match` flag.
+
+``` r
+scc(pkg_path, not_match = c("test_", "_generated"))
+```
+
+### Symlinks
+
+By default `scc` skips symbolic links. Set `include_symlinks = TRUE` to
+count them (no effect on Windows).
+
+``` r
+scc(pkg_path, include_symlinks = TRUE)
+```
+
+### Ignore files
+
+`scc` respects `.gitignore`, `.ignore`, `.gitmodules`, and `.sccignore`
+by default. Use the corresponding `no_*` flags to disable each:
+
+``` r
+scc(pkg_path, no_gitignore  = TRUE)  # ignore .gitignore rules
+scc(pkg_path, no_ignore     = TRUE)  # ignore .ignore rules
+scc(pkg_path, no_gitmodule  = TRUE)  # ignore .gitmodules
+scc(pkg_path, no_scc_ignore = TRUE)  # ignore .sccignore
+```
+
+`count_ignore = TRUE` also *counts* the ignore files themselves as
+source:
+
+``` r
+scc(pkg_path, count_ignore = TRUE)
+```
+
+## Large-file thresholds
+
+`no_large = TRUE` drops files that exceed a byte or line-count
+threshold. The defaults are 1 000 000 bytes and 40 000 lines; override
+with `large_byte_count` and `large_line_count`.
+
+``` r
+# skip files larger than 50 000 bytes or 1 000 lines
+scc(pkg_path, no_large = TRUE, large_byte_count = 50000L, large_line_count = 1000L)
+```
+
+## Language remapping
+
+### Unknown-extension files
+
+`count_as` maps file extensions to known `scc` languages using the
+format `"ext:language"` (or several mappings separated by commas):
+
+``` r
+scc(pkg_path, count_as = "qmd:Markdown,rmd:Markdown")
+```
+
+### Remap by content
+
+`remap_unknown` inspects only unrecognised files and assigns a language
+when a header string matches. `remap_all` does the same for every file,
+overriding the extension-based detection.
+
+``` r
+scc(pkg_path, remap_unknown = "# R script:R")
+scc(pkg_path, remap_all     = "# R script:R")
+```
+
+## Analysing multiple paths
+
+Both [`scc()`](https://mjfrigaard.github.io/glockr/reference/scc.md) and
+[`scc_by_file()`](https://mjfrigaard.github.io/glockr/reference/scc_by_file.md)
+accept a character vector of paths, so you can compare directories side
+by side:
+
+``` r
+scc(c(
+  file.path(pkg_path, "R"),
+  file.path(pkg_path, "tests")
+))
+#> # A tibble: 1 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+## COCOMO cost estimates
+
+`scc` includes a [COCOMO 81](https://en.wikipedia.org/wiki/COCOMO) model
+that estimates project effort and cost from SLOC. The COCOMO output is
+printed to the console (tabular mode) but does **not** add columns to
+the returned tibble.
+
+``` r
+# suppress COCOMO lines from console output
+scc(pkg_path, no_cocomo = TRUE)
+
+# customise the model
+scc(pkg_path,
+    avg_wage            = 120000L,       # annual salary in local currency
+    cocomo_project_type = "embedded",    # "organic", "semi-detached", or "embedded"
+    eaf                 = 1.1,           # effort adjustment factor
+    overhead            = 2.0,           # corporate overhead multiplier
+    currency_symbol     = "€")           # symbol shown in console output
+```
+
+`sloccount_format = TRUE` prints the COCOMO block in
+SLOCCount-compatible format (useful for tooling that parses that
+output):
+
+``` r
+scc(pkg_path, sloccount_format = TRUE)
+```
+
+## Output display flags
+
+These flags affect `scc`’s console/tabular output but do **not** change
+the tibble returned by
+[`scc()`](https://mjfrigaard.github.io/glockr/reference/scc.md) or
+[`scc_by_file()`](https://mjfrigaard.github.io/glockr/reference/scc_by_file.md).
+
+| Flag                | Default         | Effect                                                                    |
+|---------------------|-----------------|---------------------------------------------------------------------------|
+| `percent = TRUE`    | `FALSE`         | Add percentage columns to tabular output                                  |
+| `size_unit`         | `NULL` (`"si"`) | Size display unit: `"si"`, `"binary"`, `"mixed"`, or `"xkcd-*"`           |
+| `no_hborder = TRUE` | `FALSE`         | Remove horizontal borders from table                                      |
+| `no_size = TRUE`    | `FALSE`         | Hide the size-calculation summary line                                    |
+| `character = TRUE`  | `FALSE`         | Show max/mean characters-per-line columns                                 |
+| `verbose = TRUE`    | `FALSE`         | Verbose processing log (written to stderr)                                |
+| `debug = TRUE`      | `FALSE`         | Full debug log (written to stdout; may disrupt JSON in some environments) |
+
+``` r
+scc(pkg_path, percent = TRUE, size_unit = "binary")
+```
+
+## Performance tuning
+
+On very large repositories you can control the number of worker
+goroutines and queue sizes used by `scc`. The defaults work well in most
+cases; adjust only when profiling shows a bottleneck.
+
+| Parameter                      | scc default | Role                           |
+|--------------------------------|-------------|--------------------------------|
+| `directory_walker_job_workers` | `8`         | Workers scanning directories   |
+| `file_process_job_workers`     | `12`        | Workers collecting file stats  |
+| `file_gc_count`                | `10000`     | Files parsed before GC runs    |
+| `file_list_queue_size`         | `12`        | Queue for discovered files     |
+| `file_summary_job_queue_size`  | `12`        | Queue for processed-file stats |
+
+``` r
+scc(pkg_path,
+    directory_walker_job_workers = 4L,
+    file_process_job_workers     = 4L,
+    file_gc_count                = 5000L)
+```
+
+## Supported languages
+
+[`scc_languages()`](https://mjfrigaard.github.io/glockr/reference/scc_languages.md)
+returns every language `scc` recognizes, along with the file extensions
+it maps to that language.
+
+``` r
+langs <- scc_languages()
+nrow(langs)
+#> [1] 358
+
+head(langs, 10)
+#> # A tibble: 10 × 2
+#>    language     extensions
+#>    <chr>        <chr>
+#>  1 ABAP         abap
+#>  2 ABNF         abnf
+#>  3 ActionScript as
+#>  4 Ada          ada,adb,ads,pad
+#>  5 Agda         agda
+#>  6 Alchemist    crn
+#>  7 Alex         x
+#>  8 Algol 68     a68
+#>  9 Alloy        als
+#> 10 Amber        ab
+```
+
+Search for a specific language:
+
+``` r
+langs[grepl("^R$", langs$language), ]
+#> # A tibble: 1 × 2
+#>   language extensions
+#>   <chr>    <chr>
+#> 1 R        r
+```
