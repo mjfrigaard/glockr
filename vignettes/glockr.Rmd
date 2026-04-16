@@ -11,6 +11,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse  = TRUE,
   comment   = "#>",
+  fig.path = "man/figures/",
   fig.width = 7,
   fig.height = 4
 )
@@ -42,8 +43,9 @@ complexity estimates, making it useful beyond simple line counting.
 library(glockr)
 ```
 
-```{r version, eval = scc_available}
+```{r version, eval = FALSE}
 scc_version()
+#> [1] "scc version 3.7.0"
 ```
 
 ## Counting by language
@@ -51,14 +53,34 @@ scc_version()
 `scc()` returns one row per language. Here we run it against the `glockr`
 package source itself.
 
-```{r scc-pkg, eval = scc_available}
+```{r scc-pkg, eval = FALSE}
 scc(pkg_path)
+#> # A tibble: 4 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> 2 CSS          1   130   106        0     24
+#> 3 HTML         1    41    37        0      4
+#> 4 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <int>, bytes <int>,
+#> #   uloc <int>
 ```
 
 Results are sorted by `code` lines by default. Change the order with `sort`:
 
-```{r scc-sort, eval = scc_available}
+```{r scc-sort, eval = FALSE}
 scc(pkg_path, sort = "files")
+#> # A tibble: 4 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> 2 CSS          1   130   106        0     24
+#> 3 HTML         1    41    37        0      4
+#> 4 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <int>, bytes <int>,
+#> #   uloc <int>
 ```
 
 ### Filtering by extension
@@ -66,14 +88,30 @@ scc(pkg_path, sort = "files")
 Use `include_ext` to keep only certain file types. Extensions are
 case-insensitive and match without the leading dot.
 
-```{r scc-include, eval = scc_available}
+```{r scc-include, eval = FALSE}
 scc(pkg_path, include_ext = "r")
+#> # A tibble: 1 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <int>, bytes <int>,
+#> #   uloc <int>
 ```
 
 `exclude_ext` works the opposite way — exclude one or more extensions:
 
-```{r scc-exclude, eval = scc_available}
+```{r scc-exclude, eval = FALSE}
 scc(pkg_path, exclude_ext = "r")
+#> # A tibble: 3 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 CSS          1   130   106        0     24
+#> 2 HTML         1    41    37        0      4
+#> 3 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <int>, bytes <int>,
+#> #   uloc <int>
 ```
 
 ### Skipping complexity
@@ -81,8 +119,18 @@ scc(pkg_path, exclude_ext = "r")
 Complexity calculation adds a small cost on large trees. Pass
 `no_complexity = TRUE` to skip it:
 
-```{r scc-no-complexity, eval = scc_available}
+```{r scc-no-complexity, eval = FALSE}
 scc(pkg_path, no_complexity = TRUE)
+#> # A tibble: 4 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> 2 CSS          1   130   106        0     24
+#> 3 HTML         1    41    37        0      4
+#> 4 License      1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <int>, bytes <int>,
+#> #   uloc <int>
 ```
 
 ## Counting by file
@@ -90,15 +138,35 @@ scc(pkg_path, no_complexity = TRUE)
 `scc_by_file()` expands results to one row per source file, adding `filename`,
 `location`, and logical flags for `generated` and `minified` files.
 
-```{r scc-by-file, eval = scc_available}
+```{r scc-by-file, eval = FALSE}
 scc_by_file(pkg_path)
+#> # A tibble: 7 × 12
+#>   language filename  location lines  code comments
+#>   <chr>    <chr>     <chr>    <int> <int>    <int>
+#> 1 R        testthat… /Librar…     4     3        0
+#> 2 R        test-bui… /Librar…   154   119        8
+#> 3 R        test-par… /Librar…   238   212        5
+#> 4 R        test-scc… /Librar…   248   200       13
+#> 5 CSS      R.css     /Librar…   130   106        0
+#> 6 HTML     00Index.… /Librar…    41    37        0
+#> 7 License  LICENSE   /Librar…     2     2        0
+#> # ℹ 6 more variables: blanks <int>,
+#> #   complexity <int>, weighted_complexity <int>,
+#> #   bytes <int>, generated <lgl>, minified <lgl>
 ```
 
 Filter to just the R source files for a tighter view:
 
-```{r scc-by-file-r, eval = scc_available}
+```{r scc-by-file-r, eval = FALSE}
 r_files <- scc_by_file(pkg_path, include_ext = "r")
 r_files[, c("filename", "lines", "code", "comments", "blanks", "complexity")]
+#> # A tibble: 4 × 6
+#>   filename  lines  code comments blanks complexity
+#>   <chr>     <int> <int>    <int>  <int>      <int>
+#> 1 testthat…     4     3        0      1          0
+#> 2 test-bui…   154   119        8     27         13
+#> 3 test-par…   238   212        5     21         12
+#> 4 test-scc…   248   200       13     35         11
 ```
 
 ## Visualizing file composition
@@ -106,7 +174,12 @@ r_files[, c("filename", "lines", "code", "comments", "blanks", "complexity")]
 With `ggplot2` and `tidyr` we can plot the code / comment / blank split for
 each source file.
 
-```{r plot, eval = scc_available && requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("tidyr", quietly = TRUE)}
+```{r include=FALSE, eval=FALSE}
+eval = scc_available && requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("tidyr", quietly = TRUE)
+```
+
+
+```{r plot, eval=FALSE}
 library(ggplot2)
 library(tidyr)
 
@@ -134,15 +207,24 @@ ggplot(long, aes(x = n_lines, y = reorder(filename, n_lines), fill = type)) +
   theme(legend.position = "bottom")
 ```
 
+![](../man/figures/ggp2-lines-bar.png){width=700}
+
 ## Complexity metrics
 
 `scc` estimates cyclomatic complexity by counting control-flow keywords
 (`if`, `for`, `while`, etc.). The `complexity` column is the raw total;
 `weighted_complexity` divides by lines of code to give a per-line rate.
 
-```{r complexity, eval = scc_available}
+```{r complexity, eval = FALSE}
 r_files[order(-r_files$complexity),
         c("filename", "code", "complexity", "weighted_complexity")]
+#> # A tibble: 4 × 4
+#>   filename     code complexity weighted_complexity
+#>   <chr>       <int>      <int>               <int>
+#> 1 test-build…   119         13                   0
+#> 2 test-parse…   212         12                   0
+#> 3 test-scc.R    200         11                   0
+#> 4 testthat.R      3          0                   0
 ```
 
 ## Analysing multiple paths
@@ -150,11 +232,18 @@ r_files[order(-r_files$complexity),
 Both `scc()` and `scc_by_file()` accept a character vector of paths, so you
 can compare directories side by side:
 
-```{r multi-path, eval = scc_available}
+```{r multi-path, eval = FALSE}
 scc(c(
   file.path(pkg_path, "R"),
   file.path(pkg_path, "tests")
 ))
+#> # A tibble: 1 × 10
+#>   language files lines  code comments blanks
+#>   <chr>    <int> <int> <int>    <int>  <int>
+#> 1 R            4   644   534       26     84
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <int>, bytes <int>,
+#> #   uloc <int>
 ```
 
 ## Supported languages
@@ -162,15 +251,33 @@ scc(c(
 `scc_languages()` returns every language `scc` recognizes, along with the file
 extensions it maps to that language.
 
-```{r languages, eval = scc_available}
+```{r languages, eval = FALSE}
 langs <- scc_languages()
 nrow(langs)
+#> [1] 358
 
 head(langs, 10)
+#> # A tibble: 10 × 2
+#>    language     extensions     
+#>    <chr>        <chr>          
+#>  1 ABAP         abap           
+#>  2 ABNF         abnf           
+#>  3 ActionScript as             
+#>  4 Ada          ada,adb,ads,pad
+#>  5 Agda         agda           
+#>  6 Alchemist    crn            
+#>  7 Alex         x              
+#>  8 Algol 68     a68            
+#>  9 Alloy        als            
+#> 10 Amber        ab
 ```
 
 Search for a specific language:
 
-```{r lang-search, eval = scc_available}
+```{r lang-search, eval = FALSE}
 langs[grepl("^R$", langs$language), ]
+#> # A tibble: 1 × 2
+#>   language extensions
+#>   <chr>    <chr>     
+#> 1 R        r
 ```
