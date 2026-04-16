@@ -1,0 +1,26 @@
+# Claude Code local config
+.claude/
+
+# R package build artifacts
+*.o
+*.so
+*.dll
+src/*.o
+src/*.so
+*.Rproj.user/
+*.Rhistory
+*.RData
+*.Ruserdata
+
+# devtools/roxygen2
+/doc/
+/Meta/
+man/
+NAMESPACE
+
+# R check output
+/*.Rcheck/
+.Rbuildignore
+
+# macOS
+.DS_Store

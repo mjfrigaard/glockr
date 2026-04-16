@@ -1,0 +1,176 @@
+---
+title: "Getting Started with glockr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with glockr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.width = 7,
+  fig.height = 4
+)
+
+scc_available <- nchar(Sys.which("scc")) > 0L
+pkg_path <- system.file(package = "glockr")
+```
+
+`glockr` is an R wrapper around [scc](https://github.com/boyter/scc) (Succinct
+Code Counter), a fast command-line tool that counts lines of code, comments, and
+blank lines across hundreds of languages. `scc` also computes cyclomatic
+complexity estimates, making it useful beyond simple line counting.
+
+`scc` must be installed and on your `PATH`. See the
+[scc releases page](https://github.com/boyter/scc/releases) for binaries.
+
+## Functions
+
+| Function | Description |
+|---|---|
+| `scc()` | Per-language summary for one or more paths |
+| `scc_by_file()` | Per-file breakdown for one or more paths |
+| `scc_languages()` | All languages recognized by `scc` |
+| `scc_version()` | Installed `scc` version string |
+
+## Setup
+
+```{r library}
+library(glockr)
+```
+
+```{r version, eval = scc_available}
+scc_version()
+```
+
+## Counting by language
+
+`scc()` returns one row per language. Here we run it against the `glockr`
+package source itself.
+
+```{r scc-pkg, eval = scc_available}
+scc(pkg_path)
+```
+
+Results are sorted by `code` lines by default. Change the order with `sort`:
+
+```{r scc-sort, eval = scc_available}
+scc(pkg_path, sort = "files")
+```
+
+### Filtering by extension
+
+Use `include_ext` to keep only certain file types. Extensions are
+case-insensitive and match without the leading dot.
+
+```{r scc-include, eval = scc_available}
+scc(pkg_path, include_ext = "r")
+```
+
+`exclude_ext` works the opposite way — exclude one or more extensions:
+
+```{r scc-exclude, eval = scc_available}
+scc(pkg_path, exclude_ext = "r")
+```
+
+### Skipping complexity
+
+Complexity calculation adds a small cost on large trees. Pass
+`no_complexity = TRUE` to skip it:
+
+```{r scc-no-complexity, eval = scc_available}
+scc(pkg_path, no_complexity = TRUE)
+```
+
+## Counting by file
+
+`scc_by_file()` expands results to one row per source file, adding `filename`,
+`location`, and logical flags for `generated` and `minified` files.
+
+```{r scc-by-file, eval = scc_available}
+scc_by_file(pkg_path)
+```
+
+Filter to just the R source files for a tighter view:
+
+```{r scc-by-file-r, eval = scc_available}
+r_files <- scc_by_file(pkg_path, include_ext = "r")
+r_files[, c("filename", "lines", "code", "comments", "blanks", "complexity")]
+```
+
+## Visualizing file composition
+
+With `ggplot2` and `tidyr` we can plot the code / comment / blank split for
+each source file.
+
+```{r plot, eval = scc_available && requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("tidyr", quietly = TRUE)}
+library(ggplot2)
+library(tidyr)
+
+long <- pivot_longer(
+  r_files,
+  cols      = c(code, comments, blanks),
+  names_to  = "type",
+  values_to = "n_lines"
+)
+long$type <- factor(long$type, levels = c("blanks", "comments", "code"))
+
+ggplot(long, aes(x = n_lines, y = reorder(filename, n_lines), fill = type)) +
+  geom_col() +
+  scale_fill_manual(
+    values = c(code = "#2166ac", comments = "#92c5de", blanks = "#d1e5f0"),
+    labels = c(code = "Code", comments = "Comments", blanks = "Blanks")
+  ) +
+  labs(
+    title = "glockr R source — line composition",
+    x     = "Lines",
+    y     = NULL,
+    fill  = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+## Complexity metrics
+
+`scc` estimates cyclomatic complexity by counting control-flow keywords
+(`if`, `for`, `while`, etc.). The `complexity` column is the raw total;
+`weighted_complexity` divides by lines of code to give a per-line rate.
+
+```{r complexity, eval = scc_available}
+r_files[order(-r_files$complexity),
+        c("filename", "code", "complexity", "weighted_complexity")]
+```
+
+## Analysing multiple paths
+
+Both `scc()` and `scc_by_file()` accept a character vector of paths, so you
+can compare directories side by side:
+
+```{r multi-path, eval = scc_available}
+scc(c(
+  file.path(pkg_path, "R"),
+  file.path(pkg_path, "tests")
+))
+```
+
+## Supported languages
+
+`scc_languages()` returns every language `scc` recognises, along with the file
+extensions it maps to that language.
+
+```{r languages, eval = scc_available}
+langs <- scc_languages()
+nrow(langs)
+
+head(langs, 10)
+```
+
+Search for a specific language:
+
+```{r lang-search, eval = scc_available}
+langs[grepl("^R$", langs$language), ]
+```

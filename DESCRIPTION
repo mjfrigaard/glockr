@@ -1,0 +1,28 @@
+Package: glockr
+Title: Count Lines of Code Using 'scc'
+Version: 0.1.0
+Authors@R:
+    person("First", "Last", email = "mjfrigaard@pm.me", role = c("aut", "cre"))
+Description: An R wrapper around the 'scc' (Succinct Code Counter) command-line
+    utility <https://github.com/boyter/scc>. Counts lines of code, comments,
+    and blank lines across many languages, with optional complexity metrics.
+    'scc' must be installed and available on the system PATH.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports:
+    processx,
+    jsonlite,
+    tibble
+Suggests:
+    ggplot2,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    tidyr
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+SystemRequirements: scc (https://github.com/boyter/scc)
+URL: https://github.com/mjfrigaard/glockr
+BugReports: https://github.com/mjfrigaard/glockr/issues
