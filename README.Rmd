@@ -116,11 +116,12 @@ r_files[order(-r_files$complexity),
 
 `scc_languages()` returns every language `scc` recognizes, along with the file extensions it maps to that language.
 
-
 ```{r}
 langs <- scc_languages()
 nrow(langs)
 ```
+
+Number of languages:
 
 ```{r}
 #> [1] 358
