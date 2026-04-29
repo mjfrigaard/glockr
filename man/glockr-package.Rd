@@ -24,7 +24,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: First Last \email{mjfrigaard@pm.me}
+\strong{Maintainer}: Martin Frigaard \email{mjfrigaard@pm.me}
 
 }
 \keyword{internal}

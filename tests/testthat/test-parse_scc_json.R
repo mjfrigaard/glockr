@@ -236,3 +236,64 @@ test_that("empty tibbles have the correct column schema", {
       "blanks", "complexity", "weighted_complexity", "bytes",
       "generated", "minified"))
 })
+
+# --- empty_scc_tibble() direct tests -----------------------------------------
+
+test_that("empty_scc_tibble(FALSE) returns a zero-row tibble", {
+  result <- glockr:::empty_scc_tibble(FALSE)
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 0L)
+})
+
+test_that("empty_scc_tibble(FALSE) has the correct 10 columns", {
+  result <- glockr:::empty_scc_tibble(FALSE)
+  expect_named(result, c("language", "files", "lines", "code", "comments",
+    "blanks", "complexity", "weighted_complexity", "bytes", "uloc"))
+})
+
+test_that("empty_scc_tibble(FALSE) has correct column types", {
+  result <- glockr:::empty_scc_tibble(FALSE)
+  expect_type(result$language,            "character")
+  expect_type(result$files,               "integer")
+  expect_type(result$lines,               "integer")
+  expect_type(result$code,                "integer")
+  expect_type(result$comments,            "integer")
+  expect_type(result$blanks,              "integer")
+  expect_type(result$complexity,          "integer")
+  expect_type(result$weighted_complexity, "double")
+  expect_type(result$bytes,               "integer")
+  expect_type(result$uloc,                "integer")
+})
+
+test_that("empty_scc_tibble(TRUE) returns a zero-row tibble", {
+  result <- glockr:::empty_scc_tibble(TRUE)
+  expect_s3_class(result, "tbl_df")
+  expect_equal(nrow(result), 0L)
+})
+
+test_that("empty_scc_tibble(TRUE) has the correct 12 columns", {
+  result <- glockr:::empty_scc_tibble(TRUE)
+  expect_named(result, c("language", "filename", "location", "lines", "code",
+    "comments", "blanks", "complexity", "weighted_complexity", "bytes",
+    "generated", "minified"))
+})
+
+test_that("empty_scc_tibble(TRUE) has correct column types", {
+  result <- glockr:::empty_scc_tibble(TRUE)
+  expect_type(result$language,            "character")
+  expect_type(result$filename,            "character")
+  expect_type(result$location,            "character")
+  expect_type(result$lines,               "integer")
+  expect_type(result$code,                "integer")
+  expect_type(result$comments,            "integer")
+  expect_type(result$blanks,              "integer")
+  expect_type(result$complexity,          "integer")
+  expect_type(result$weighted_complexity, "double")
+  expect_type(result$bytes,               "integer")
+  expect_type(result$generated,           "logical")
+  expect_type(result$minified,            "logical")
+})
+
+test_that("empty_scc_tibble() defaults to by_file = FALSE", {
+  expect_identical(glockr:::empty_scc_tibble(), glockr:::empty_scc_tibble(FALSE))
+})
