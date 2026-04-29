@@ -2,11 +2,11 @@ Package: glockr
 Title: Count Lines of Code Using 'scc'
 Version: 0.1.0
 Authors@R:
-    person("First", "Last", , "mjfrigaard@pm.me", role = c("aut", "cre"))
+    person("Martin", "Frigaard", , "mjfrigaard@pm.me", role = c("aut", "cre"))
 Description: An R wrapper around the 'scc' (Succinct Code Counter)
     command-line utility <https://github.com/boyter/scc>. Counts lines of
     code, comments, and blank lines across many languages, with optional
-    complexity metrics.  'scc' must be installed and available on the
+    complexity metrics. 'scc' must be installed and available on the
     system PATH.
 License: MIT + file LICENSE
 URL: https://github.com/mjfrigaard/glockr,
