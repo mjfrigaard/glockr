@@ -1,6 +1,9 @@
 # Claude Code local config
 .claude/
 
+# Bundled external package sources
+inst/pkgs/
+
 # R package build artifacts
 *.o
 *.so

@@ -229,8 +229,20 @@ ggplot(long, aes(x = n_lines, y = reorder(filename, n_lines), fill = type)) +
 ## Complexity metrics
 
 `scc` estimates cyclomatic complexity by counting control-flow keywords
-(`if`, `for`, `while`, etc.). The `complexity` column is the raw total;
-`weighted_complexity` is a `double` rounded to two decimal places.
+(`if`, `for`, `while`, etc.). The `complexity` column is the raw total.
+
+`weighted_complexity` reports cyclomatic complexity *per 100 lines of code*,
+using the same formula `scc` applies in its wide tabular output:
+
+```
+weighted_complexity = (complexity / code) * 100      # 0 when code == 0
+```
+
+Note that `scc`'s JSON formatter does **not** populate `WeightedComplexity`
+(the field is emitted as `0` regardless of input), so `glockr` computes the
+value itself from `complexity` and `code`. For `scc_by_file()` this matches
+`scc`'s per-file value exactly; for `scc()` the same formula is applied to
+each language's aggregate totals.
 
 ```{r complexity, eval = FALSE}
 r_files[order(-r_files$complexity),
@@ -238,9 +250,9 @@ r_files[order(-r_files$complexity),
 #> # A tibble: 4 × 4
 #>   filename     code complexity weighted_complexity
 #>   <chr>       <int>      <int>               <dbl>
-#> 1 test-build…   119         13                0.11
-#> 2 test-parse…   212         12                0.06
-#> 3 test-scc.R    200         11                0.06
+#> 1 test-build…   119         13               10.9
+#> 2 test-parse…   212         12                5.66
+#> 3 test-scc.R    200         11                5.5
 #> 4 testthat.R      3          0                0
 ```
 

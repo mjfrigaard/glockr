@@ -15,8 +15,10 @@
 #'     \item{comments}{Lines of comments (integer).}
 #'     \item{blanks}{Blank lines (integer).}
 #'     \item{complexity}{Total cyclomatic complexity score (integer).}
-#'     \item{weighted_complexity}{Complexity weighted by lines of code (double,
-#'       full precision as returned by `scc`).}
+#'     \item{weighted_complexity}{Complexity per 100 lines of code, computed
+#'       as `(complexity / code) * 100` (double; `0` when `code == 0`).
+#'       Matches the formula used by `scc` for its per-record weighted
+#'       complexity.}
 #'     \item{bytes}{File size in bytes (integer).}
 #'     \item{uloc}{Unique lines of code; `0` unless `uloc` or `dryness` is
 #'       `TRUE` (integer).}

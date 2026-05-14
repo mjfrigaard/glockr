@@ -137,7 +137,7 @@ test_that("parse_scc_json() maps JSON fields to the correct columns", {
   expect_equal(r_row$comments,           2L)
   expect_equal(r_row$blanks,             2L)
   expect_equal(r_row$complexity,         3L)
-  expect_equal(r_row$weighted_complexity, 3.0)
+  expect_equal(r_row$weighted_complexity, 50)
   expect_equal(r_row$bytes,            200L)
   expect_equal(r_row$uloc,              5L)
 })

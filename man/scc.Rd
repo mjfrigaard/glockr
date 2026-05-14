@@ -205,8 +205,10 @@ A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per language and co
 \item{comments}{Lines of comments (integer).}
 \item{blanks}{Blank lines (integer).}
 \item{complexity}{Total cyclomatic complexity score (integer).}
-\item{weighted_complexity}{Complexity weighted by lines of code (double,
-full precision as returned by \code{scc}).}
+\item{weighted_complexity}{Complexity per 100 lines of code, computed
+as \code{(complexity / code) * 100} (double; \code{0} when \code{code == 0}).
+Matches the formula used by \code{scc} for its per-record weighted
+complexity.}
 \item{bytes}{File size in bytes (integer).}
 \item{uloc}{Unique lines of code; \code{0} unless \code{uloc} or \code{dryness} is
 \code{TRUE} (integer).}

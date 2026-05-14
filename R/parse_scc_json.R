@@ -21,6 +21,12 @@
 #' parse_scc_json(json_by_file, by_file = TRUE)
 #' }
 parse_scc_json <- function(json_text, by_file = FALSE) {
+  weighted_complexity <- function(complexity, code) {
+    code <- as.double(code %||% 0)
+    if (is.na(code) || code == 0) return(0)
+    (as.double(complexity %||% 0) / code) * 100
+  }
+
   if (!nzchar(trimws(json_text))) return(empty_scc_tibble(by_file))
 
   # scc --debug writes diagnostic lines (e.g. "DEBUG ...") to stdout; strip them
@@ -41,7 +47,7 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
         comments            = lang$Comment,
         blanks              = lang$Blank,
         complexity          = lang$Complexity,
-        weighted_complexity = as.double(lang$WeightedComplexity),
+        weighted_complexity = weighted_complexity(lang$Complexity, lang$Code),
         bytes               = lang$Bytes,
         uloc                = lang$ULOC %||% 0L
       )
@@ -62,7 +68,7 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
           comments            = f$Comment,
           blanks              = f$Blank,
           complexity          = f$Complexity,
-          weighted_complexity = as.double(f$WeightedComplexity),
+          weighted_complexity = weighted_complexity(f$Complexity, f$Code),
           bytes               = f$Bytes,
           generated           = isTRUE(f$Generated),
           minified            = isTRUE(f$Minified)
