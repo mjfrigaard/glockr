@@ -206,7 +206,7 @@ A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per language and co
 \item{blanks}{Blank lines (integer).}
 \item{complexity}{Total cyclomatic complexity score (integer).}
 \item{weighted_complexity}{Complexity weighted by lines of code (double,
-rounded to 2 decimal places).}
+full precision as returned by \code{scc}).}
 \item{bytes}{File size in bytes (integer).}
 \item{uloc}{Unique lines of code; \code{0} unless \code{uloc} or \code{dryness} is
 \code{TRUE} (integer).}
