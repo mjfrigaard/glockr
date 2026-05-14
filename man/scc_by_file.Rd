@@ -207,7 +207,7 @@ A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per file and column
 \item{blanks}{Blank lines (integer).}
 \item{complexity}{Cyclomatic complexity score (integer).}
 \item{weighted_complexity}{Complexity weighted by lines of code (double,
-rounded to 2 decimal places).}
+full precision as returned by \code{scc}).}
 \item{bytes}{File size in bytes (integer).}
 \item{generated}{\code{TRUE} if file is auto-generated (logical).}
 \item{minified}{\code{TRUE} if file is minified (logical).}
