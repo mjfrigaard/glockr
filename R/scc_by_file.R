@@ -15,8 +15,10 @@
 #'     \item{comments}{Lines of comments (integer).}
 #'     \item{blanks}{Blank lines (integer).}
 #'     \item{complexity}{Cyclomatic complexity score (integer).}
-#'     \item{weighted_complexity}{Complexity weighted by lines of code (double,
-#'       full precision as returned by `scc`).}
+#'     \item{weighted_complexity}{Complexity per 100 lines of code, computed
+#'       as `(complexity / code) * 100` (double; `0` when `code == 0`).
+#'       Matches the formula used by `scc` for its per-file weighted
+#'       complexity.}
 #'     \item{bytes}{File size in bytes (integer).}
 #'     \item{generated}{`TRUE` if file is auto-generated (logical).}
 #'     \item{minified}{`TRUE` if file is minified (logical).}
