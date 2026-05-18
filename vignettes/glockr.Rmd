@@ -43,58 +43,25 @@ complexity estimates, making it useful beyond simple line counting.
 library(glockr)
 ```
 
-```{r version, eval = FALSE}
+```{r version, eval = TRUE}
 scc_version()
-#> [1] "scc version 3.7.0"
 ```
 
 ## Counting by language
 
 `scc()` returns one row per language. The examples below use the `rlang` source
-bundled at `inst/pkgs/rlang`.
+bundled at `inst/pkgs/rlang`.[^rlang-download]
 
-```{r scc-pkg, eval = FALSE}
+[^rlang-download]: This is a downloaded a local version of the [source files](https://github.com/r-lib/rlang/) as of 2026-05-13.
+
+```{r scc-pkg, eval = TRUE}
 scc(rlang_path)
-#> # A tibble: 11 × 10
-#>    language   files lines  code comments blanks
-#>    <chr>      <int> <int> <int>    <int>  <int>
-#>  1 R            163 44571 28038    11152   5381
-#>  2 Markdown      53 16935 13866        0   3069
-#>  3 C             70 14014 10960      872   2182
-#>  4 C Header      72  8210  5315     1777   1118
-#>  5 YAML           9   735   587       35    113
-#>  6 C++            2    25    21        0      4
-#>  7 C++ Header     1    26    21        0      5
-#>  8 SVG           10    10    10        0      0
-#>  9 Makefile       1    11     7        0      4
-#> 10 License        1     2     2        0      0
-#> 11 TOML           1     2     2        0      0
-#> # ℹ 4 more variables: complexity <int>,
-#> #   weighted_complexity <dbl>, bytes <int>,
-#> #   uloc <int>
 ```
 
 Results are sorted by `code` lines by default. Change the order with `sort`:
 
-```{r scc-sort, eval = FALSE}
-scc(rlang_path, sort = "files")
-#> # A tibble: 11 × 10
-#>    language   files lines  code comments blanks
-#>    <chr>      <int> <int> <int>    <int>  <int>
-#>  1 R            163 44571 28038    11152   5381
-#>  2 C Header      72  8210  5315     1777   1118
-#>  3 C             70 14014 10960      872   2182
-#>  4 Markdown      53 16935 13866        0   3069
-#>  5 SVG           10    10    10        0      0
-#>  6 YAML           9   735   587       35    113
-#>  7 C++            2    25    21        0      4
-#>  8 C++ Header     1    26    21        0      5
-#>  9 License        1     2     2        0      0
-#> 10 Makefile       1    11     7        0      4
-#> 11 TOML           1     2     2        0      0
-#> # ℹ 4 more variables: complexity <int>,
-#> #   weighted_complexity <dbl>, bytes <int>,
-#> #   uloc <int>
+```{r scc-sort, eval = TRUE}
+scc(rlang_path, sort = "complexity")
 ```
 
 Valid `sort` values are: `"name"`, `"files"`, `"lines"`, `"code"`,
