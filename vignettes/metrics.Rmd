@@ -1,0 +1,145 @@
+---
+title: "Code Metrics"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Code Metrics}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.path = "../man/figures/",
+  fig.width = 7,
+  fig.height = 4
+)
+
+scc_available <- nchar(Sys.which("scc")) > 0L
+rlang_path <- system.file("pkgs/rlang", package = "glockr")
+```
+
+```{r library}
+library(glockr)
+```
+
+## Complexity metrics
+
+`scc` estimates cyclomatic complexity by counting control-flow keywords
+(`if`, `for`, `while`, etc.). The `complexity` column is the raw total.
+
+`weighted_complexity` reports cyclomatic complexity *per 100 lines of code*,
+using the same formula `scc` applies in its wide tabular output:
+
+```
+weighted_complexity = (complexity / code) * 100      # 0 when code == 0
+```
+
+Note that `scc`'s JSON formatter does **not** populate `WeightedComplexity`
+(the field is emitted as `0` regardless of input), so `glockr` computes the
+value itself from `complexity` and `code`. For `scc_by_file()` this matches
+`scc`'s per-file value exactly; for `scc()` the same formula is applied to
+each language's aggregate totals.
+
+```{r complexity, eval = FALSE}
+r_files <- scc_by_file(rlang_path, include_ext = "r")
+
+r_files[order(-r_files$complexity),
+        c("filename", "code", "complexity", "weighted_complexity")]
+#> # A tibble: 163 × 4
+#>    filename               code complexity weighted_complexity
+#>    <chr>                 <int>      <int>               <dbl>
+#>  1 cnd-abort.R             691        152                22.0
+#>  2 standalone-cli.R        432        135                31.2
+#>  3 trace.R                 807        134                16.6
+#>  4 deparse.R               819        111                13.6
+#>  5 standalone-vctrs.R      505        107                21.2
+#>  6 call.R                  451         92                20.4
+#>  7 standalone-obj-type.R   206         64                31.1
+#>  8 cnd-entrace.R           213         61                28.6
+#>  9 utils.R                 302         59                19.5
+#> 10 expr.R                  157         52                33.1
+#> # ℹ 153 more rows
+```
+
+## Unique lines of code
+
+`uloc = TRUE` asks `scc` to count *unique* lines of code (ULOC) — the number
+of distinct non-blank, non-comment lines. `dryness = TRUE` also computes ULOC
+and additionally prints a DRYness score in the console (it has no extra effect
+on the returned tibble).
+
+```{r uloc, eval = FALSE}
+scc(rlang_path, uloc = TRUE)
+#> # A tibble: 11 × 10
+#>    language   files lines  code comments blanks
+#>    <chr>      <int> <int> <int>    <int>  <int>
+#>  1 R            163 44571 28038    11152   5381
+#>  2 Markdown      53 16935 13866        0   3069
+#>  3 C             70 14014 10960      872   2182
+#>  4 C Header      72  8210  5315     1777   1118
+#>  5 YAML           9   735   587       35    113
+#>  6 C++            2    25    21        0      4
+#>  7 C++ Header     1    26    21        0      5
+#>  8 SVG           10    10    10        0      0
+#>  9 Makefile       1    11     7        0      4
+#> 10 License        1     2     2        0      0
+#> 11 TOML           1     2     2        0      0
+#> # ℹ 4 more variables: complexity <int>,
+#> #   weighted_complexity <dbl>, bytes <int>,
+#> #   uloc <int>
+```
+
+The `uloc` column is now populated — for example, R has 23 837 unique code
+lines out of 28 038 total, suggesting about 15 % duplication across the
+codebase.
+
+## Language remapping
+
+### Unknown-extension files
+
+`count_as` maps file extensions to known `scc` languages using the format
+`"ext:language"` (or several mappings separated by commas):
+
+```{r count-as, eval = FALSE}
+scc(rlang_path, count_as = "qmd:Markdown,rmd:Markdown")
+```
+
+### Remap by content
+
+`remap_unknown` inspects only unrecognised files and assigns a language when a
+header string matches. `remap_all` does the same for every file, overriding
+the extension-based detection.
+
+```{r remap, eval = FALSE}
+scc(rlang_path, remap_unknown = "# R script:R")
+scc(rlang_path, remap_all     = "# R script:R")
+```
+
+## COCOMO cost estimates
+
+`scc` includes a
+[COCOMO 81](https://en.wikipedia.org/wiki/COCOMO) model that estimates project
+effort and cost from SLOC. The COCOMO output is printed to the console (tabular
+mode) but does **not** add columns to the returned tibble.
+
+```{r cocomo, eval = FALSE}
+# suppress COCOMO lines from console output
+scc(rlang_path, no_cocomo = TRUE)
+
+# customise the model
+scc(rlang_path,
+    avg_wage            = 120000L,       # annual salary in local currency
+    cocomo_project_type = "embedded",    # "organic", "semi-detached", or "embedded"
+    eaf                 = 1.1,           # effort adjustment factor
+    overhead            = 2.0,           # corporate overhead multiplier
+    currency_symbol     = "€")           # symbol shown in console output
+```
+
+`sloccount_format = TRUE` prints the COCOMO block in SLOCCount-compatible
+format (useful for tooling that parses that output):
+
+```{r sloccount, eval = FALSE}
+scc(rlang_path, sloccount_format = TRUE)
+```
