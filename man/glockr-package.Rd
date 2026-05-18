@@ -26,5 +26,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Martin Frigaard \email{mjfrigaard@pm.me}
 
+Authors:
+\itemize{
+  \item Martin Frigaard \email{mjfrigaard@pm.me}
+}
+
 }
 \keyword{internal}
