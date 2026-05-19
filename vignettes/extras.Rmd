@@ -17,7 +17,12 @@ knitr::opts_chunk$set(
 )
 
 scc_available <- nchar(Sys.which("scc")) > 0L
-rlang_path <- system.file("pkgs/rlang", package = "glockr")
+rlang_path    <- glockr:::fetch_rlang_source()
+if (is.na(rlang_path)) {
+  message("rlang source unavailable; downstream chunks shown but not evaluated.")
+  knitr::opts_chunk$set(eval = FALSE)
+  rlang_path <- ""
+}
 ```
 
 ```{r library}

@@ -20,7 +20,12 @@ knitr::opts_chunk$set(
 )
 
 scc_available <- nchar(Sys.which("scc")) > 0L
-rlang_path <- file.path("../inst/pkgs/rlang")
+rlang_path    <- glockr:::fetch_rlang_source()
+if (is.na(rlang_path)) {
+  message("rlang source unavailable; downstream chunks shown but not evaluated.")
+  knitr::opts_chunk$set(eval = FALSE)
+  rlang_path <- ""
+}
 ```
 
 ```{r library}
@@ -37,7 +42,7 @@ library(gt)
 
 By default `scc()` returns the per-language tibble and ignores all COCOMO-related arguments. Pass `cocomo = TRUE` to also compute and return the COCOMO summary:
 
-```{r cocomo, eval = TRUE}
+```{r cocomo}
 rlang_cocomo <- scc(rlang_path, cocomo = TRUE)
 ```
 
@@ -101,7 +106,7 @@ silent$cocomo
 
 `sloccount_format = TRUE` reformats the upstream COCOMO block in SLOCCount-compatible form (useful for tooling that parses that output). The block doesn't fit the standard `metric / project_type / value` shape, so it's printed verbatim and `$cocomo` is `NULL`:
 
-```{r sloccount, eval = TRUE}
+```{r sloccount}
 sloc <- scc(rlang_path,
             cocomo           = TRUE,
             sloccount_format = TRUE,

@@ -20,7 +20,12 @@ knitr::opts_chunk$set(
 )
 
 scc_available <- nchar(Sys.which("scc")) > 0L
-rlang_path <- file.path("../inst/pkgs/rlang")
+rlang_path    <- glockr:::fetch_rlang_source()
+if (is.na(rlang_path)) {
+  message("rlang source unavailable; downstream chunks shown but not evaluated.")
+  knitr::opts_chunk$set(eval = FALSE)
+  rlang_path <- ""
+}
 ```
 
 ```{r library}
@@ -32,7 +37,7 @@ library(gt)
 
 `scc_by_file()` expands results to one row per source file, adding `filename`, `location`, and logical flags for `generated` and `minified` files.
 
-```{r scc-by-file, eval = TRUE}
+```{r scc-by-file}
 rlang_by_file <- scc_by_file(rlang_path) 
 rlang_by_file[order(rlang_by_file$complexity, decreasing = TRUE), ] |> 
   head(10) |> 
@@ -42,7 +47,7 @@ rlang_by_file[order(rlang_by_file$complexity, decreasing = TRUE), ] |>
 
 Filter to just the R source files and sort by complexity:
 
-```{r scc-by-file-r, eval = TRUE}
+```{r scc-by-file-r}
 r_files <- scc_by_file(rlang_path, include_ext = "r")
 r_files_sub <- r_files[, c("filename", "lines", "code", "comments", "blanks", "complexity")]
 r_files_sub[order(r_files_sub$complexity, decreasing = TRUE), ] |> 

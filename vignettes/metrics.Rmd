@@ -20,7 +20,12 @@ knitr::opts_chunk$set(
 )
 
 scc_available <- nchar(Sys.which("scc")) > 0L
-rlang_path <- file.path("../inst/pkgs/rlang")
+rlang_path    <- glockr:::fetch_rlang_source()
+if (is.na(rlang_path)) {
+  message("rlang source unavailable; downstream chunks shown but not evaluated.")
+  knitr::opts_chunk$set(eval = FALSE)
+  rlang_path <- ""
+}
 ```
 
 ```{r library}
@@ -42,7 +47,7 @@ weighted_complexity = (complexity / code) * 100      # 0 when code == 0
 
 Note that `scc`'s JSON formatter does **not** populate `WeightedComplexity` (the field is emitted as `0` regardless of input), so `glockr` computes the value itself from `complexity` and `code`. For `scc_by_file()` this matches `scc`'s per-file value exactly; for `scc()` the same formula is applied to each language's aggregate totals.
 
-```{r complexity, eval = TRUE}
+```{r complexity}
 r_files <- scc_by_file(rlang_path, include_ext = "r")
 ```
 
@@ -58,7 +63,7 @@ r_files[order(-r_files$complexity),
 
 `uloc = TRUE` asks `scc` to count *unique* lines of code (ULOC) — the number of distinct non-blank, non-comment lines. 
 
-```{r uloc, eval = TRUE}
+```{r uloc}
 scc(rlang_path, uloc = TRUE) |>
   gt::gt(caption = "Succinct Code Counter (with ULOC calculations)", 
          rowname_col = "language") 
@@ -66,7 +71,7 @@ scc(rlang_path, uloc = TRUE) |>
 
 `dryness = TRUE` also computes ULOC and additionally prints a DRYness score in the console (it has no extra effect on the returned tibble).
 
-```{r dryness, eval = TRUE}
+```{r dryness}
 scc(rlang_path, dryness = TRUE) |>
   gt::gt(caption = "Succinct Code Counter (with dryness = TRUE)", 
          rowname_col = "language") 
@@ -82,7 +87,7 @@ Below are arguments for including unknown file types and languages.
 
 `count_as` maps file extensions to known `scc` languages using the format `"ext:language"` (or several mappings separated by commas). Below we include Quarto and RMarkdown as Markdown. 
 
-```{r count-as, eval = TRUE}
+```{r count-as}
 scc(rlang_path, count_as = "qmd:Markdown,rmd:Markdown") |>
     gt::gt(caption = "Succinct Code Counter (including .Qmd/.Rmd)", 
            rowname_col = "language") 
@@ -92,7 +97,7 @@ scc(rlang_path, count_as = "qmd:Markdown,rmd:Markdown") |>
 
 `remap_unknown` inspects only unrecognized files and assigns a language when a header string matches. 
 
-```{r remap_unknown, eval = TRUE}
+```{r remap_unknown}
 scc(rlang_path, remap_unknown = "# R script:R") |>
   gt::gt(caption = "Succinct Code Counter (remap unknown # R script:R)", 
        rowname_col = "language")
@@ -100,7 +105,7 @@ scc(rlang_path, remap_unknown = "# R script:R") |>
 
 `remap_all` does the same for every file, overriding the extension-based detection.
 
-```{r remap_all, eval = TRUE}
+```{r remap_all}
 scc(rlang_path, remap_all = "# R script:R") |>
   gt::gt(caption = "Succinct Code Counter (remap all # R script:R)", 
        rowname_col = "language")

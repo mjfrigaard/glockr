@@ -20,7 +20,13 @@ knitr::opts_chunk$set(
 )
 
 scc_available <- nchar(Sys.which("scc")) > 0L
-rlang_path <- file.path("../inst/pkgs/rlang")
+rlang_version <- "1.1.6"
+rlang_path    <- glockr:::fetch_rlang_source(rlang_version)
+if (is.na(rlang_path)) {
+  message("rlang source unavailable; downstream chunks shown but not evaluated.")
+  knitr::opts_chunk$set(eval = FALSE)
+  rlang_path <- ""
+}
 ```
 
 `glockr` is an R wrapper around [scc](https://github.com/boyter/scc) (Succinct
@@ -47,18 +53,19 @@ library(glockr)
 library(gt)
 ```
 
-```{r version, eval = TRUE}
+```{r version}
 scc_version()
 ```
 
 ## Counting by language
 
 `scc()` returns one row per language. The examples below use the `rlang` source
-bundled at `inst/pkgs/rlang`.[^rlang-download]
+tree, downloaded and extracted into a session-local tempdir during this
+vignette's setup chunk.[^rlang-download]
 
-[^rlang-download]: This is a downloaded a local version of the [source files](https://github.com/r-lib/rlang/) as of 2026-05-13.
+[^rlang-download]: Version `r rlang_version` is fetched from `https://github.com/r-lib/rlang/archive/refs/tags/v{version}.tar.gz` on the first call to `glockr:::fetch_rlang_source()`, then cached for the rest of the R session. If no network is available, downstream chunks are shown but not evaluated.
 
-```{r scc-pkg, eval = TRUE}
+```{r scc-pkg}
 scc(rlang_path) |> 
   gt::gt(caption = "Succinct Code Counter (rlang R package)", 
     rowname_col = "language") 
@@ -66,7 +73,7 @@ scc(rlang_path) |>
 
 Results are sorted by `code` lines by default. Change the order with `sort`:
 
-```{r scc-sort, eval = TRUE}
+```{r scc-sort}
 scc(rlang_path, sort = "complexity") |> 
   gt::gt(caption = "Succinct Code Counter (sorted by complexity)", 
     rowname_col = "language") 
@@ -78,7 +85,7 @@ Valid `sort` values are: `"name"`, `"files"`, `"lines"`, `"code"`, `"comments"`,
 
 Use `include_ext` to keep only certain file types. Extensions are case-insensitive and match without the leading dot.
 
-```{r scc-include, eval = TRUE}
+```{r scc-include}
 scc(rlang_path, include_ext = "r") |> 
   gt::gt(caption = "Succinct Code Counter (by file extension)", 
   rowname_col = "language") 
@@ -86,7 +93,7 @@ scc(rlang_path, include_ext = "r") |>
 
 `exclude_ext` works the opposite way — exclude one or more extensions:
 
-```{r scc-exclude, eval = TRUE}
+```{r scc-exclude}
 scc(rlang_path, exclude_ext = "r") |> 
   gt::gt(caption = "Succinct Code Counter (omit file extensions)", 
   rowname_col = "language") 
@@ -94,7 +101,7 @@ scc(rlang_path, exclude_ext = "r") |>
 
 Pass a character vector to filter on multiple extensions at once:
 
-```{r scc-multi-ext, eval = TRUE}
+```{r scc-multi-ext}
 scc(rlang_path, include_ext = c("r", "c")) |> 
   gt::gt(caption = "Succinct Code Counter (.R and .c files)", 
          rowname_col = "language") 
@@ -105,7 +112,7 @@ scc(rlang_path, include_ext = c("r", "c")) |>
 Complexity calculation adds a small cost on large trees. Pass
 `no_complexity = TRUE` to skip it:
 
-```{r scc-no-complexity, eval = TRUE}
+```{r scc-no-complexity}
 scc(rlang_path, no_complexity = TRUE) |> 
   gt::gt(caption = "Succinct Code Counter (no complexity calculations)", 
          rowname_col = "language") 
