@@ -44,7 +44,9 @@ scc_by_file(
   no_scc_ignore = FALSE,
   no_hborder = FALSE,
   no_size = FALSE,
-  no_cocomo = FALSE,
+  cocomo = FALSE,
+  auto_print_scc = TRUE,
+  auto_print_cocomo = TRUE,
   avg_wage = NULL,
   cocomo_project_type = NULL,
   eaf = NULL,
@@ -160,7 +162,22 @@ No effect on the returned tibble.}
 \item{no_size}{Logical. Remove size-calculation line from tabular output.
 No effect on the returned tibble.}
 
-\item{no_cocomo}{Logical. Remove COCOMO output from tabular display.}
+\item{cocomo}{Logical. When \code{TRUE}, also runs \code{scc} in tabular mode to
+extract its COCOMO cost / effort estimate and returns a list with both
+the per-language tibble (\verb{$scc}) and a COCOMO tibble (\verb{$cocomo},
+columns \code{metric}, \code{project_type}, \code{value}). Defaults to \code{FALSE}, in
+which case the per-language tibble is returned directly and the
+COCOMO-related arguments (\code{avg_wage}, \code{cocomo_project_type}, \code{eaf},
+\code{overhead}, \code{currency_symbol}, \code{sloccount_format}) have no effect.}
+
+\item{auto_print_scc}{Logical. When \code{TRUE} (default) and \code{cocomo = TRUE},
+prints the per-language tibble to the console as a side effect. Has no
+effect when \code{cocomo = FALSE} (the visible tibble auto-prints under
+normal R rules).}
+
+\item{auto_print_cocomo}{Logical. When \code{TRUE} (default) and
+\code{cocomo = TRUE}, prints the COCOMO tibble (or the raw SLOCCount block
+when \code{sloccount_format = TRUE}) to the console as a side effect.}
 
 \item{avg_wage}{Integer. Average annual wage for COCOMO calculation.
 Default \code{NULL} (scc default \code{56286}).}
@@ -196,7 +213,12 @@ Default \code{NULL} (scc default \code{12}).}
 stats. Default \code{NULL} (scc default \code{12}).}
 }
 \value{
-A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per file and columns:
+When \code{cocomo = FALSE} (default), a \code{\link[tibble:tibble]{tibble::tibble()}} with one
+row per file. When \code{cocomo = TRUE}, a list (returned invisibly) with
+two elements: \code{scc} (the per-file tibble) and \code{cocomo} (the COCOMO
+tibble, or \code{NULL} when \code{sloccount_format = TRUE}).
+
+Per-file tibble columns:
 \describe{
 \item{language}{Programming language name.}
 \item{filename}{File name (basename).}

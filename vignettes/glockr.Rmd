@@ -1,6 +1,9 @@
 ---
 title: "Getting Started with glockr"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 4
 vignette: >
   %\VignetteIndexEntry{Getting Started with glockr}
   %\VignetteEngine{knitr::rmarkdown}
@@ -17,7 +20,7 @@ knitr::opts_chunk$set(
 )
 
 scc_available <- nchar(Sys.which("scc")) > 0L
-rlang_path <- system.file("pkgs/rlang", package = "glockr")
+rlang_path <- file.path("../inst/pkgs/rlang")
 ```
 
 `glockr` is an R wrapper around [scc](https://github.com/boyter/scc) (Succinct
@@ -41,6 +44,7 @@ complexity estimates, making it useful beyond simple line counting.
 
 ```{r library}
 library(glockr)
+library(gt)
 ```
 
 ```{r version, eval = TRUE}
@@ -55,68 +59,45 @@ bundled at `inst/pkgs/rlang`.[^rlang-download]
 [^rlang-download]: This is a downloaded a local version of the [source files](https://github.com/r-lib/rlang/) as of 2026-05-13.
 
 ```{r scc-pkg, eval = TRUE}
-scc(rlang_path)
+scc(rlang_path) |> 
+  gt::gt(caption = "Succinct Code Counter (rlang R package)", 
+    rowname_col = "language") 
 ```
 
 Results are sorted by `code` lines by default. Change the order with `sort`:
 
 ```{r scc-sort, eval = TRUE}
-scc(rlang_path, sort = "complexity")
+scc(rlang_path, sort = "complexity") |> 
+  gt::gt(caption = "Succinct Code Counter (sorted by complexity)", 
+    rowname_col = "language") 
 ```
 
-Valid `sort` values are: `"name"`, `"files"`, `"lines"`, `"code"`,
-`"comments"`, `"blanks"`, `"complexity"`.
+Valid `sort` values are: `"name"`, `"files"`, `"lines"`, `"code"`, `"comments"`, `"blanks"`, `"complexity"`.
 
 ### Filtering by extension
 
-Use `include_ext` to keep only certain file types. Extensions are
-case-insensitive and match without the leading dot.
+Use `include_ext` to keep only certain file types. Extensions are case-insensitive and match without the leading dot.
 
-```{r scc-include, eval = FALSE}
-scc(rlang_path, include_ext = "r")
-#> # A tibble: 1 × 10
-#>   language files lines  code comments blanks
-#>   <chr>    <int> <int> <int>    <int>  <int>
-#> 1 R          163 44571 28038    11152   5381
-#> # ℹ 4 more variables: complexity <int>,
-#> #   weighted_complexity <dbl>, bytes <int>,
-#> #   uloc <int>
+```{r scc-include, eval = TRUE}
+scc(rlang_path, include_ext = "r") |> 
+  gt::gt(caption = "Succinct Code Counter (by file extension)", 
+  rowname_col = "language") 
 ```
 
 `exclude_ext` works the opposite way — exclude one or more extensions:
 
-```{r scc-exclude, eval = FALSE}
-scc(rlang_path, exclude_ext = "r")
-#> # A tibble: 10 × 10
-#>    language   files lines  code comments blanks
-#>    <chr>      <int> <int> <int>    <int>  <int>
-#>  1 Markdown      53 16935 13866        0   3069
-#>  2 C             70 14014 10960      872   2182
-#>  3 C Header      72  8210  5315     1777   1118
-#>  4 YAML           9   735   587       35    113
-#>  5 C++            2    25    21        0      4
-#>  6 C++ Header     1    26    21        0      5
-#>  7 SVG           10    10    10        0      0
-#>  8 Makefile       1    11     7        0      4
-#>  9 License        1     2     2        0      0
-#> 10 TOML           1     2     2        0      0
-#> # ℹ 4 more variables: complexity <int>,
-#> #   weighted_complexity <dbl>, bytes <int>,
-#> #   uloc <int>
+```{r scc-exclude, eval = TRUE}
+scc(rlang_path, exclude_ext = "r") |> 
+  gt::gt(caption = "Succinct Code Counter (omit file extensions)", 
+  rowname_col = "language") 
 ```
 
 Pass a character vector to filter on multiple extensions at once:
 
-```{r scc-multi-ext, eval = FALSE}
-scc(rlang_path, include_ext = c("r", "c"))
-#> # A tibble: 2 × 10
-#>   language files lines  code comments blanks
-#>   <chr>    <int> <int> <int>    <int>  <int>
-#> 1 R          163 44571 28038    11152   5381
-#> 2 C           70 14014 10960      872   2182
-#> # ℹ 4 more variables: complexity <int>,
-#> #   weighted_complexity <dbl>, bytes <int>,
-#> #   uloc <int>
+```{r scc-multi-ext, eval = TRUE}
+scc(rlang_path, include_ext = c("r", "c")) |> 
+  gt::gt(caption = "Succinct Code Counter (.R and .c files)", 
+         rowname_col = "language") 
 ```
 
 ### Skipping complexity
@@ -124,23 +105,8 @@ scc(rlang_path, include_ext = c("r", "c"))
 Complexity calculation adds a small cost on large trees. Pass
 `no_complexity = TRUE` to skip it:
 
-```{r scc-no-complexity, eval = FALSE}
-scc(rlang_path, no_complexity = TRUE)
-#> # A tibble: 11 × 10
-#>    language   files lines  code comments blanks
-#>    <chr>      <int> <int> <int>    <int>  <int>
-#>  1 R            163 44571 28038    11152   5381
-#>  2 Markdown      53 16935 13866        0   3069
-#>  3 C             70 14014 10960      872   2182
-#>  4 C Header      72  8210  5315     1777   1118
-#>  5 YAML           9   735   587       35    113
-#>  6 C++            2    25    21        0      4
-#>  7 C++ Header     1    26    21        0      5
-#>  8 SVG           10    10    10        0      0
-#>  9 Makefile       1    11     7        0      4
-#> 10 License        1     2     2        0      0
-#> 11 TOML           1     2     2        0      0
-#> # ℹ 4 more variables: complexity <int>,
-#> #   weighted_complexity <dbl>, bytes <int>,
-#> #   uloc <int>
+```{r scc-no-complexity, eval = TRUE}
+scc(rlang_path, no_complexity = TRUE) |> 
+  gt::gt(caption = "Succinct Code Counter (no complexity calculations)", 
+         rowname_col = "language") 
 ```

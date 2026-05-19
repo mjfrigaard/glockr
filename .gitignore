@@ -28,3 +28,4 @@ docs
 /.quarto/
 **/*.quarto_ipynb
 .Rproj.user
+inst/doc

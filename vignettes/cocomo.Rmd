@@ -1,0 +1,111 @@
+---
+title: "COCOMO cost estimates"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 4
+vignette: >
+  %\VignetteIndexEntry{COCOMO cost estimates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.path = "../man/figures/",
+  fig.width = 7,
+  fig.height = 4
+)
+
+scc_available <- nchar(Sys.which("scc")) > 0L
+rlang_path <- file.path("../inst/pkgs/rlang")
+```
+
+```{r library}
+library(glockr)
+library(gt)
+```
+
+
+## COCOMO cost estimates
+
+`scc` includes a [COCOMO 81](https://en.wikipedia.org/wiki/COCOMO) model that estimates project effort and cost from `SLOC`. `scc` only emits COCOMO output via its tabular formatter — never in its JSON output — so `glockr` opts in by running `scc` a second time in tabular mode, scraping the COCOMO block, and parsing it into a tibble.
+
+### Opting in with `cocomo = TRUE`
+
+By default `scc()` returns the per-language tibble and ignores all COCOMO-related arguments. Pass `cocomo = TRUE` to also compute and return the COCOMO summary:
+
+```{r cocomo, eval = TRUE}
+rlang_cocomo <- scc(rlang_path, cocomo = TRUE)
+```
+
+The returned value is now a list (returned invisibly) with two tibbles:
+
+```{r cocomo-shape}
+names(rlang_cocomo)
+rlang_cocomo$cocomo
+```
+
+### Customize the COCOMO model
+
+The customization arguments only take effect when `cocomo = TRUE`:
+
+* `avg_wage`
+* `cocomo_project_type`
+* `eaf`
+* `overhead`
+* `currency_symbol`
+
+```{r cocomo-embedded}
+embedded <- scc(rlang_path,
+    cocomo              = TRUE,          # required to compute COCOMO
+    avg_wage            = 120000L,       # annual salary in local currency
+    cocomo_project_type = "embedded",    # "organic", "semi-detached", or "embedded"
+    eaf                 = 1.1,           # effort adjustment factor
+    overhead            = 2.0,           # corporate overhead multiplier
+    currency_symbol     = "$",           # symbol shown in the Value column
+    auto_print_scc      = FALSE)         # skip auto-printing the language tibble
+
+embedded$cocomo
+```
+
+```{r cocomo-organic}
+organic <- scc(rlang_path,
+    cocomo              = TRUE,
+    avg_wage            = 140000L,
+    cocomo_project_type = "organic",
+    eaf                 = 1.1,
+    overhead            = 2.0,
+    currency_symbol     = "$",
+    auto_print_scc      = FALSE)
+
+organic$cocomo
+```
+
+### Quieting the auto-print
+
+When `cocomo = TRUE`, `scc()` prints both tibbles to the console as a side effect. Set `auto_print_scc = FALSE` and/or `auto_print_cocomo = FALSE` to suppress either one and just keep the returned list:
+
+```{r cocomo-silent}
+silent <- scc(rlang_path,
+              cocomo            = TRUE,
+              auto_print_scc    = FALSE,
+              auto_print_cocomo = FALSE)
+
+silent$cocomo
+```
+
+### SLOCCount-compatible format
+
+`sloccount_format = TRUE` reformats the upstream COCOMO block in SLOCCount-compatible form (useful for tooling that parses that output). The block doesn't fit the standard `metric / project_type / value` shape, so it's printed verbatim and `$cocomo` is `NULL`:
+
+```{r sloccount, eval = TRUE}
+sloc <- scc(rlang_path,
+            cocomo           = TRUE,
+            sloccount_format = TRUE,
+            auto_print_scc   = FALSE)
+
+is.null(sloc$cocomo)
+```

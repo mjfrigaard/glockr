@@ -273,7 +273,8 @@ test_that("generated_markers replaces default markers for generation detection",
 
   # With custom marker, gen.R IS detected and excluded
   result_custom <- scc(dir, no_gen = TRUE,
-                       generated_markers = "CUSTOM_GEN_MARKER")
+                       generated_markers = "CUSTOM_GEN_MARKER",
+                       )
   r_custom      <- result_custom[result_custom$language == "R", ]
   expect_equal(r_custom$files, 1L)
 })
@@ -470,7 +471,6 @@ test_that("COCOMO flags pass through without corrupting JSON output", {
   skip_if_not(scc_available, "scc not on PATH")
   dir    <- make_test_dir(list("script.R" = r_content))
   result <- scc(dir,
-    no_cocomo           = TRUE,
     avg_wage            = 75000L,
     cocomo_project_type = "embedded",
     eaf                 = 1.2,

@@ -182,6 +182,41 @@ test_that("scc() bytes column is positive for non-empty files", {
   expect_true(all(result$bytes > 0L))
 })
 
+# --- scc() COCOMO list return -----------------------------------------------
+
+test_that("scc() returns a list of scc + cocomo tibbles when cocomo = TRUE", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir <- make_test_dir(list("script.R" = r_content))
+  capture.output(out <- scc(dir, cocomo = TRUE))
+  expect_type(out, "list")
+  expect_named(out, c("scc", "cocomo"))
+  expect_s3_class(out$scc,    "tbl_df")
+  expect_s3_class(out$cocomo, "tbl_df")
+  expect_named(out$cocomo, c("metric", "project_type", "value"))
+})
+
+test_that("scc_by_file() returns a list of scc + cocomo tibbles when cocomo = TRUE", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir <- make_test_dir(list("script.R" = r_content))
+  capture.output(out <- scc_by_file(dir, cocomo = TRUE))
+  expect_type(out, "list")
+  expect_named(out, c("scc", "cocomo"))
+  expect_s3_class(out$scc,    "tbl_df")
+  expect_s3_class(out$cocomo, "tbl_df")
+})
+
+test_that("scc() with cocomo = TRUE and both auto_print_* FALSE is silent", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir <- make_test_dir(list("script.R" = r_content))
+  captured <- capture.output(
+    out <- scc(dir, cocomo = TRUE,
+               auto_print_scc = FALSE, auto_print_cocomo = FALSE)
+  )
+  expect_equal(captured, character(0))
+  expect_type(out, "list")
+  expect_s3_class(out$cocomo, "tbl_df")
+})
+
 # --- scc_by_file() ----------------------------------------------------------
 
 test_that("scc_by_file() returns a tibble", {
