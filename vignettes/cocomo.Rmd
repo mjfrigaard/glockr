@@ -57,23 +57,27 @@ rlang_cocomo$cocomo
 
 The customization arguments only take effect when `cocomo = TRUE`:
 
-* `avg_wage`
-* `cocomo_project_type`
-* `eaf`
-* `overhead`
-* `currency_symbol`
+* `avg_wage`: annual salary in local currency   
+* `cocomo_project_type`: "organic", "semi-detached", or "embedded"
+* `eaf`: effort adjustment factor   
+* `overhead`: corporate overhead multiplier   
+* `currency_symbol`: symbol shown in the value column   
+* `auto_print_scc`: skip auto-printing the language tibble      
 
 ```{r cocomo-embedded}
 embedded <- scc(rlang_path,
     cocomo              = TRUE,          # required to compute COCOMO
-    avg_wage            = 120000L,       # annual salary in local currency
-    cocomo_project_type = "embedded",    # "organic", "semi-detached", or "embedded"
-    eaf                 = 1.1,           # effort adjustment factor
-    overhead            = 2.0,           # corporate overhead multiplier
-    currency_symbol     = "$",           # symbol shown in the Value column
-    auto_print_scc      = FALSE)         # skip auto-printing the language tibble
+    avg_wage            = 120000L,        
+    cocomo_project_type = "embedded",     
+    eaf                 = 1.1,            
+    overhead            = 2.0,            
+    currency_symbol     = "$",            
+    auto_print_scc      = FALSE)         
+```
 
-embedded$cocomo
+```{r}
+embedded$cocomo |> 
+    gt::gt(caption = "COCOMO tibble")
 ```
 
 ```{r cocomo-organic}
@@ -85,8 +89,11 @@ organic <- scc(rlang_path,
     overhead            = 2.0,
     currency_symbol     = "$",
     auto_print_scc      = FALSE)
+```
 
-organic$cocomo
+```{r}
+organic$cocomo |> 
+  gt::gt(caption = "COCOMO organic project type")
 ```
 
 ### Quieting the auto-print
@@ -98,19 +105,26 @@ silent <- scc(rlang_path,
               cocomo            = TRUE,
               auto_print_scc    = FALSE,
               auto_print_cocomo = FALSE)
+```
 
-silent$cocomo
+```{r}
+silent$cocomo |> 
+  gt::gt(caption = "COCOMO tibble (without auto-print)")
 ```
 
 ### SLOCCount-compatible format
 
-`sloccount_format = TRUE` reformats the upstream COCOMO block in SLOCCount-compatible form (useful for tooling that parses that output). The block doesn't fit the standard `metric / project_type / value` shape, so it's printed verbatim and `$cocomo` is `NULL`:
+`sloccount_format = TRUE` reformats the upstream COCOMO block in SLOCCount-compatible form (useful for tooling that parses that output). 
 
 ```{r sloccount}
 sloc <- scc(rlang_path,
             cocomo           = TRUE,
             sloccount_format = TRUE,
             auto_print_scc   = FALSE)
+```
 
+The block doesn't fit the standard `metric / project_type / value` shape, so it's printed verbatim and `$cocomo` is `NULL`:
+
+```{r}
 is.null(sloc$cocomo)
 ```
