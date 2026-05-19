@@ -1,6 +1,9 @@
 ---
 title: "Counting by File"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 4
 vignette: >
   %\VignetteIndexEntry{Counting by File}
   %\VignetteEngine{knitr::rmarkdown}
@@ -17,65 +20,40 @@ knitr::opts_chunk$set(
 )
 
 scc_available <- nchar(Sys.which("scc")) > 0L
-rlang_path <- system.file("pkgs/rlang", package = "glockr")
+rlang_path <- file.path("../inst/pkgs/rlang")
 ```
 
 ```{r library}
 library(glockr)
+library(gt)
 ```
 
 ## Counting by file
 
-`scc_by_file()` expands results to one row per source file, adding `filename`,
-`location`, and logical flags for `generated` and `minified` files.
+`scc_by_file()` expands results to one row per source file, adding `filename`, `location`, and logical flags for `generated` and `minified` files.
 
-```{r scc-by-file, eval = FALSE}
-scc_by_file(rlang_path)
-#> # A tibble: 383 × 12
-#>    language filename     location lines  code comments
-#>    <chr>    <chr>        <chr>    <int> <int>    <int>
-#>  1 R        sink.R       /Users/…     8     6        1
-#>  2 R        testthat.R   /Users/…     7     4        1
-#>  3 R        test-obj.R   /Users/…     5     5        0
-#>  4 R        c-lib.R      /Users/…   413   312       26
-#>  5 R        test-friend… /Users/…   299   283        1
-#>  6 R        nse-inject.R /Users/…   551    63      472
-#>  7 R        aaa-topics.R /Users/…    93    65       10
-#>  8 R        quo.R        /Users/…   752   394      298
-#>  9 R        attr.R       /Users/…   302    72      211
-#> 10 R        test-standa… /Users/…    32    27        0
-#> # ℹ 373 more rows
-#> # ℹ 6 more variables: blanks <int>,
-#> #   complexity <int>, weighted_complexity <dbl>,
-#> #   bytes <int>, generated <lgl>, minified <lgl>
+```{r scc-by-file, eval = TRUE}
+rlang_by_file <- scc_by_file(rlang_path) 
+rlang_by_file[order(rlang_by_file$complexity, decreasing = TRUE), ] |> 
+  head(10) |> 
+  gt::gt(caption = "Top 10 Succinct Code Counter (rlang R package)", 
+         rowname_col = "language") 
 ```
 
 Filter to just the R source files and sort by complexity:
 
-```{r scc-by-file-r, eval = FALSE}
+```{r scc-by-file-r, eval = TRUE}
 r_files <- scc_by_file(rlang_path, include_ext = "r")
 r_files_sub <- r_files[, c("filename", "lines", "code", "comments", "blanks", "complexity")]
-r_files_sub[order(r_files_sub$complexity, decreasing = TRUE), ]
-#> # A tibble: 163 × 6
-#>    filename              lines  code comments blanks complexity
-#>    <chr>                 <int> <int>    <int>  <int>      <int>
-#>  1 cnd-abort.R            1561   691      729    141        152
-#>  2 standalone-cli.R        653   432      172     49        135
-#>  3 trace.R                1170   807      188    175        134
-#>  4 deparse.R              1092   819      114    159        111
-#>  5 standalone-vctrs.R      669   505       48    116        107
-#>  6 call.R                 1076   451      550     75         92
-#>  7 standalone-obj-type.R   313   206       72     35         64
-#>  8 cnd-entrace.R           405   213      147     45         61
-#>  9 utils.R                 372   302       11     59         59
-#> 10 expr.R                  421   157      237     27         52
-#> # ℹ 153 more rows
+r_files_sub[order(r_files_sub$complexity, decreasing = TRUE), ] |> 
+  head(10) |> 
+  gt::gt(caption = "Top 10 Complex R files (rlang R package)", 
+         rowname_col = "filename")
 ```
 
 ## Visualizing file composition
 
-With `ggplot2` and `tidyr` we can plot the code / comment / blank split for
-the most complex R source files.
+With `ggplot2` and `tidyr` we can plot the code / comment / blank split for the most complex R source files.
 
 ```{r plot, eval = scc_available}
 library(ggplot2)
@@ -86,7 +64,7 @@ r_files <- scc_by_file(rlang_path, include_ext = "r")
 # keep the 15 files with the most lines
 top15 <- r_files[order(r_files$lines, decreasing = TRUE), ][1:15, ]
 
-long <- pivot_longer(
+long <- tidyr::pivot_longer(
   top15,
   cols      = c(code, comments, blanks),
   names_to  = "type",
@@ -94,20 +72,19 @@ long <- pivot_longer(
 )
 long$type <- factor(long$type, levels = c("blanks", "comments", "code"))
 
-ggplot(long, aes(x = n_lines, y = reorder(filename, n_lines), fill = type)) +
-  geom_col() +
-  scale_fill_manual(
+ggplot2::ggplot(long, 
+  ggplot2::aes(x = n_lines, y = reorder(filename, n_lines), fill = type)) +
+  ggplot2::geom_col() +
+  ggplot2::scale_fill_manual(
     values = c(code = "#2166ac", comments = "#92c5de", blanks = "#d1e5f0"),
     labels = c(code = "Code", comments = "Comments", blanks = "Blanks")
   ) +
-  labs(
-    title = "rlang R source — line composition (top 15 by lines)",
+  ggplot2::labs(
+    title = "Stacked bar chart showing code, comment, and blank line counts for\nthe 15 largest R source files in rlang",
     x     = "Lines",
     y     = NULL,
     fill  = NULL
   ) +
-  theme_minimal(base_size = 11) +
-  theme(legend.position = "bottom")
+  ggplot2::theme_minimal(base_size = 11) +
+  ggplot2::theme(legend.position = "bottom")
 ```
-
-![Stacked bar chart showing code, comment, and blank line counts for the 15 largest R source files in rlang.](https://raw.githubusercontent.com/mjfrigaard/glockr/refs/heads/main/man/figures/ggp2-lines-bar.png){width=700}

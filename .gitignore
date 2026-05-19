@@ -31,3 +31,4 @@ docs
 **/*.quarto_ipynb
 .Rproj.user
 .positai
+inst/doc

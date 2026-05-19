@@ -5,7 +5,14 @@
 #'
 #' @inheritParams scc
 #'
-#' @return A [tibble::tibble()] with one row per file and columns:
+#' @inheritParams scc
+#'
+#' @return When `cocomo = FALSE` (default), a [tibble::tibble()] with one
+#'   row per file. When `cocomo = TRUE`, a list (returned invisibly) with
+#'   two elements: `scc` (the per-file tibble) and `cocomo` (the COCOMO
+#'   tibble, or `NULL` when `sloccount_format = TRUE`).
+#'
+#'   Per-file tibble columns:
 #'   \describe{
 #'     \item{language}{Programming language name.}
 #'     \item{filename}{File name (basename).}
@@ -72,7 +79,9 @@ scc_by_file <- function(
     no_scc_ignore                = FALSE,
     no_hborder                   = FALSE,
     no_size                      = FALSE,
-    no_cocomo                    = FALSE,
+    cocomo                       = FALSE,
+    auto_print_scc               = TRUE,
+    auto_print_cocomo            = TRUE,
     avg_wage                     = NULL,
     cocomo_project_type          = NULL,
     eaf                          = NULL,
@@ -126,13 +135,6 @@ scc_by_file <- function(
     no_scc_ignore                = no_scc_ignore,
     no_hborder                   = no_hborder,
     no_size                      = no_size,
-    no_cocomo                    = no_cocomo,
-    avg_wage                     = avg_wage,
-    cocomo_project_type          = cocomo_project_type,
-    eaf                          = eaf,
-    overhead                     = overhead,
-    currency_symbol              = currency_symbol,
-    sloccount_format             = sloccount_format,
     directory_walker_job_workers = directory_walker_job_workers,
     file_gc_count                = file_gc_count,
     file_list_queue_size         = file_list_queue_size,
@@ -144,5 +146,22 @@ scc_by_file <- function(
   res <- processx::run(scc_bin, args = args, error_on_status = FALSE)
   if (res$status != 0L) stop("scc failed:\n", res$stderr, call. = FALSE)
 
-  parse_scc_json(res$stdout, by_file = TRUE)
+  scc_tbl <- parse_scc_json(res$stdout, by_file = TRUE)
+
+  if (!isTRUE(cocomo)) return(scc_tbl)
+
+  if (isTRUE(auto_print_scc)) print(scc_tbl)
+  cocomo_tbl <- scc_cocomo(
+    scc_bin             = scc_bin,
+    path                = path,
+    avg_wage            = avg_wage,
+    cocomo_project_type = cocomo_project_type,
+    eaf                 = eaf,
+    overhead            = overhead,
+    currency_symbol     = currency_symbol,
+    sloccount_format    = sloccount_format,
+    auto_print          = auto_print_cocomo
+  )
+  if (!is.null(cocomo_tbl) && isTRUE(auto_print_cocomo)) print(cocomo_tbl)
+  invisible(list(scc = scc_tbl, cocomo = cocomo_tbl))
 }
