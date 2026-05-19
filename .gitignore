@@ -1,5 +1,5 @@
 
-# Bundled external package sources
+# Bundled external package sources (downloaded by vignettes at build time)
 inst/pkgs/
 
 # R package build artifacts
