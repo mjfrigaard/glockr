@@ -16,7 +16,9 @@ template:
       google: Ubuntu Mono
 
 articles:
-- contents:
+- title: Articles
+  navbar: ~
+  contents:
   - glockr
   - metrics
   - by-file
