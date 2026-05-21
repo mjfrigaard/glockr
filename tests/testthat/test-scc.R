@@ -233,7 +233,7 @@ test_that("scc_by_file() has the expected column names", {
   expect_named(result,
     c("language", "filename", "location", "lines", "code", "comments",
       "blanks", "complexity", "weighted_complexity", "bytes",
-      "generated", "minified"))
+      "uloc", "generated", "minified"))
 })
 
 test_that("scc_by_file() returns one row per file", {

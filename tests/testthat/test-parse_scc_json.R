@@ -168,7 +168,7 @@ test_that("parse_scc_json() has the correct columns for by-file output", {
   expect_named(result,
     c("language", "filename", "location", "lines", "code", "comments",
       "blanks", "complexity", "weighted_complexity", "bytes",
-      "generated", "minified"))
+      "uloc", "generated", "minified"))
 })
 
 test_that("parse_scc_json() returns one row per file (languages without files dropped)", {
@@ -234,7 +234,7 @@ test_that("empty tibbles have the correct column schema", {
   expect_named(by_file_empty,
     c("language", "filename", "location", "lines", "code", "comments",
       "blanks", "complexity", "weighted_complexity", "bytes",
-      "generated", "minified"))
+      "uloc", "generated", "minified"))
 })
 
 # --- empty_scc_tibble() direct tests -----------------------------------------
@@ -271,11 +271,11 @@ test_that("empty_scc_tibble(TRUE) returns a zero-row tibble", {
   expect_equal(nrow(result), 0L)
 })
 
-test_that("empty_scc_tibble(TRUE) has the correct 12 columns", {
+test_that("empty_scc_tibble(TRUE) has the correct 13 columns", {
   result <- glockr:::empty_scc_tibble(TRUE)
   expect_named(result, c("language", "filename", "location", "lines", "code",
     "comments", "blanks", "complexity", "weighted_complexity", "bytes",
-    "generated", "minified"))
+    "uloc", "generated", "minified"))
 })
 
 test_that("empty_scc_tibble(TRUE) has correct column types", {

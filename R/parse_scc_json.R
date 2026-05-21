@@ -70,6 +70,7 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
           complexity          = f$Complexity,
           weighted_complexity = weighted_complexity(f$Complexity, f$Code),
           bytes               = f$Bytes,
+          uloc                = f$Uloc %||% 0L,
           generated           = isTRUE(f$Generated),
           minified            = isTRUE(f$Minified)
         )

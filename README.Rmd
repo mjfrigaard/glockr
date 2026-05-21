@@ -7,7 +7,7 @@ output: github_document
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>",
+  comment = "# ",
   eval = TRUE,
   fig.path = "man/figures/README-",
   out.width = "100%"
@@ -50,10 +50,8 @@ scc_version()
 pkg_path <- system.file(package = "dplyr")
 ```
 
-Set `uloc` to `TRUE` for the weighted complexity. 
-
 ```{r}
-scc(pkg_path, uloc = TRUE)
+scc(pkg_path)
 ```
 
 Filter to just the R source files and sort by `complexity` for a tighter view:
@@ -75,14 +73,15 @@ r_files[order(-r_files$weighted_complexity),
 
 ```{r}
 langs <- scc_languages()
-nrow(langs)
 ```
 
 Number of languages:
 
 ```{r}
-#> [1] 358
+nrow(langs)
 ```
+
+Also includes the extensions:
 
 ```{r}
 head(langs, 10)

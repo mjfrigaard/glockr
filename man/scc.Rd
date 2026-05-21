@@ -8,7 +8,7 @@ scc(
   path = ".",
   sort = "code",
   no_complexity = FALSE,
-  uloc = FALSE,
+  uloc = TRUE,
   dryness = FALSE,
   character = FALSE,
   percent = FALSE,
@@ -232,8 +232,9 @@ as \code{(complexity / code) * 100} (double; \code{0} when \code{code == 0}).
 Matches the formula used by \code{scc} for its per-record weighted
 complexity.}
 \item{bytes}{File size in bytes (integer).}
-\item{uloc}{Unique lines of code; \code{0} unless \code{uloc} or \code{dryness} is
-\code{TRUE} (integer).}
+\item{uloc}{Unique lines of code (integer). Populated by default
+(\code{uloc = TRUE}); set \code{uloc = FALSE} to skip the calculation, in
+which case the column is \code{0}.}
 }
 }
 \description{

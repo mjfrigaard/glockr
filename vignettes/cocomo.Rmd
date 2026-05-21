@@ -13,7 +13,7 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse  = TRUE,
-  comment   = "#>",
+  comment   = "# ",
   fig.path = "../man/figures/",
   fig.width = 7,
   fig.height = 4
@@ -50,7 +50,15 @@ The returned value is now a list (returned invisibly) with two tibbles:
 
 ```{r cocomo-shape}
 names(rlang_cocomo)
-rlang_cocomo$cocomo
+```
+
+```{r}
+rlang_cocomo$cocomo |> 
+  gt::gt() |> 
+  gt::tab_header(
+    title = "COCOMO Estimates", 
+    subtitle = "rlang package", 
+    preheader = "rlang package")
 ```
 
 ### Customize the COCOMO model
@@ -77,7 +85,11 @@ embedded <- scc(rlang_path,
 
 ```{r}
 embedded$cocomo |> 
-    gt::gt(caption = "COCOMO tibble")
+  gt::gt() |> 
+  gt::tab_header(
+    title = "COCOMO", 
+    subtitle = "embedded project", 
+    preheader = "rlang package")
 ```
 
 ```{r cocomo-organic}
@@ -93,7 +105,11 @@ organic <- scc(rlang_path,
 
 ```{r}
 organic$cocomo |> 
-  gt::gt(caption = "COCOMO organic project type")
+  gt::gt() |> 
+  gt::tab_header(
+    title = "COCOMO", 
+    subtitle = "organic project", 
+    preheader = "rlang package")
 ```
 
 ### Quieting the auto-print
@@ -107,24 +123,29 @@ silent <- scc(rlang_path,
               auto_print_cocomo = FALSE)
 ```
 
-```{r}
-silent$cocomo |> 
-  gt::gt(caption = "COCOMO tibble (without auto-print)")
-```
-
 ### SLOCCount-compatible format
 
 `sloccount_format = TRUE` reformats the upstream COCOMO block in SLOCCount-compatible form (useful for tooling that parses that output). 
 
-```{r sloccount}
-sloc <- scc(rlang_path,
-            cocomo           = TRUE,
-            sloccount_format = TRUE,
-            auto_print_scc   = FALSE)
+```{r sloccount, comment="", collapse=FALSE}
+sloccount <- scc(rlang_path,
+                 cocomo           = TRUE,
+                 sloccount_format = TRUE,
+                 auto_print_scc   = FALSE)
 ```
 
 The block doesn't fit the standard `metric / project_type / value` shape, so it's printed verbatim and `$cocomo` is `NULL`:
 
 ```{r}
-is.null(sloc$cocomo)
+is.null(sloccount$cocomo)
 ```
+
+### Why not use COCOMO ???
+
+`scc() `only gives us raw structural numbers (lines, code, complexity, bytes, etc.), but COCOMO II needs 22 judgement inputs we can't derive from source code:    
+
+  * The current COCOMO project types (`"organic"` / `"semi-detached"` / `"embedded"`) don't translate to COCOMO  II    
+  * COCOMO II uses 5 scale factors (PREC, FLEX, RESL, TEAM, PMAT) for organizational/process attributes and  17 effort multipliers (RELY, DATA, CPLX, RUSE, DOCU, TIME, STOR, PVOL, ACAP, PCAP, PCON, APEX, PLEX, LTEX, TOOL, SITE, SCED) on product, platform, personnel, and project context   
+  * Every one of these is a human rating (VL /  L /  N / H / VH / XH) about the team, requirements stability, reuse strategy, tool maturity, schedule pressure, etc. 
+  
+The only one that *might*  map would be CPLX (product complexity), but COCOMO II's CPLX is architectural/algorithmic complexity, not  McCabe's cyclomatic.

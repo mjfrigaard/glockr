@@ -13,7 +13,7 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse  = TRUE,
-  comment   = "#>",
+  comment   = "# ",
   fig.path = "../man/figures/",
   fig.width = 7,
   fig.height = 4
@@ -55,8 +55,11 @@ r_files <- scc_by_file(rlang_path, include_ext = "r")
 r_files[order(-r_files$complexity),
         c("filename", "code", "complexity", "weighted_complexity")] |>
   head(10) |>
-  gt::gt(caption = "Top 10 Complex files (.R files)",
-    rowname_col = "filename")
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Top 10 Complex files", 
+    subtitle = ".R files", 
+    preheader = "rlang package")
 ```
 
 ## Unique lines of code
@@ -64,17 +67,23 @@ r_files[order(-r_files$complexity),
 `uloc = TRUE` asks `scc` to count *unique* lines of code (ULOC) — the number of distinct non-blank, non-comment lines. 
 
 ```{r uloc}
-scc(rlang_path, uloc = TRUE) |>
-  gt::gt(caption = "Succinct Code Counter (with ULOC calculations)", 
-         rowname_col = "language") 
+scc(rlang_path) |>
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "with ULOC calculations", 
+    preheader = "rlang package")
 ```
 
 `dryness = TRUE` also computes ULOC and additionally prints a DRYness score in the console (it has no extra effect on the returned tibble).
 
 ```{r dryness}
 scc(rlang_path, dryness = TRUE) |>
-  gt::gt(caption = "Succinct Code Counter (with dryness = TRUE)", 
-         rowname_col = "language") 
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "with dryness = TRUE", 
+    preheader = "rlang package")
 ```
 
 **The `uloc` column is now populated — for example, R has 23,837 unique code lines out of 28,038 total, suggesting about 15 % duplication across the codebase.**
@@ -89,8 +98,11 @@ Below are arguments for including unknown file types and languages.
 
 ```{r count-as}
 scc(rlang_path, count_as = "qmd:Markdown,rmd:Markdown") |>
-    gt::gt(caption = "Succinct Code Counter (including .Qmd/.Rmd)", 
-           rowname_col = "language") 
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "including .Qmd/.Rmd", 
+    preheader = "rlang package")
 ```
 
 ### Remap by content
@@ -99,14 +111,20 @@ scc(rlang_path, count_as = "qmd:Markdown,rmd:Markdown") |>
 
 ```{r remap_unknown}
 scc(rlang_path, remap_unknown = "# R script:R") |>
-  gt::gt(caption = "Succinct Code Counter (remap unknown # R script:R)", 
-       rowname_col = "language")
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "remap unknown # R script:R", 
+    preheader = "rlang package")
 ```
 
 `remap_all` does the same for every file, overriding the extension-based detection.
 
 ```{r remap_all}
 scc(rlang_path, remap_all = "# R script:R") |>
-  gt::gt(caption = "Succinct Code Counter (remap all # R script:R)", 
-       rowname_col = "language")
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "remap all # R script:R", 
+    preheader = "rlang package")
 ```
