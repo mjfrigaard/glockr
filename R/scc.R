@@ -40,8 +40,9 @@
 #'       Matches the formula used by `scc` for its per-record weighted
 #'       complexity.}
 #'     \item{bytes}{File size in bytes (integer).}
-#'     \item{uloc}{Unique lines of code; `0` unless `uloc` or `dryness` is
-#'       `TRUE` (integer).}
+#'     \item{uloc}{Unique lines of code (integer). Populated by default
+#'       (`uloc = TRUE`); set `uloc = FALSE` to skip the calculation, in
+#'       which case the column is `0`.}
 #'   }
 #'
 #' @export
@@ -57,7 +58,7 @@ scc <- function(
     path                         = ".",
     sort                         = "code",
     no_complexity                = FALSE,
-    uloc                         = FALSE,
+    uloc                         = TRUE,
     dryness                      = FALSE,
     character                    = FALSE,
     percent                      = FALSE,

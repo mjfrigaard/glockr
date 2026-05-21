@@ -13,7 +13,7 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse  = TRUE,
-  comment   = "#>",
+  comment   = "# ",
   fig.path = "../man/figures/",
   fig.width = 7,
   fig.height = 4
@@ -67,16 +67,22 @@ vignette's setup chunk.[^rlang-download]
 
 ```{r scc-pkg}
 scc(rlang_path) |> 
-  gt::gt(caption = "Succinct Code Counter (rlang R package)", 
-    rowname_col = "language") 
+  gt::gt( ) |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "rlang R package",
+    preheader = NULL)
 ```
 
 Results are sorted by `code` lines by default. Change the order with `sort`:
 
 ```{r scc-sort}
 scc(rlang_path, sort = "complexity") |> 
-  gt::gt(caption = "Succinct Code Counter (sorted by complexity)", 
-    rowname_col = "language") 
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "sorted by complexity", 
+    preheader = "rlang package")
 ```
 
 Valid `sort` values are: `"name"`, `"files"`, `"lines"`, `"code"`, `"comments"`, `"blanks"`, `"complexity"`.
@@ -87,24 +93,33 @@ Use `include_ext` to keep only certain file types. Extensions are case-insensiti
 
 ```{r scc-include}
 scc(rlang_path, include_ext = "r") |> 
-  gt::gt(caption = "Succinct Code Counter (by file extension)", 
-  rowname_col = "language") 
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "by file extension", 
+    preheader = "rlang package")
 ```
 
 `exclude_ext` works the opposite way — exclude one or more extensions:
 
 ```{r scc-exclude}
 scc(rlang_path, exclude_ext = "r") |> 
-  gt::gt(caption = "Succinct Code Counter (omit file extensions)", 
-  rowname_col = "language") 
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "omit file extensions", 
+    preheader = "rlang package")
 ```
 
 Pass a character vector to filter on multiple extensions at once:
 
 ```{r scc-multi-ext}
 scc(rlang_path, include_ext = c("r", "c")) |> 
-  gt::gt(caption = "Succinct Code Counter (.R and .c files)", 
-         rowname_col = "language") 
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = ".R and .c files", 
+    preheader = "rlang package")
 ```
 
 ### Skipping complexity
@@ -114,6 +129,9 @@ Complexity calculation adds a small cost on large trees. Pass
 
 ```{r scc-no-complexity}
 scc(rlang_path, no_complexity = TRUE) |> 
-  gt::gt(caption = "Succinct Code Counter (no complexity calculations)", 
-         rowname_col = "language") 
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Succinct Code Counter", 
+    subtitle = "no complexity calculations", 
+    preheader = "rlang package")
 ```

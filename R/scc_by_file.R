@@ -27,6 +27,9 @@
 #'       Matches the formula used by `scc` for its per-file weighted
 #'       complexity.}
 #'     \item{bytes}{File size in bytes (integer).}
+#'     \item{uloc}{Unique lines of code (integer). Populated by default
+#'       (`uloc = TRUE`); set `uloc = FALSE` to skip the calculation, in
+#'       which case the column is `0`.}
 #'     \item{generated}{`TRUE` if file is auto-generated (logical).}
 #'     \item{minified}{`TRUE` if file is minified (logical).}
 #'   }
@@ -43,7 +46,7 @@ scc_by_file <- function(
     path                         = ".",
     sort                         = "code",
     no_complexity                = FALSE,
-    uloc                         = FALSE,
+    uloc                         = TRUE,
     dryness                      = FALSE,
     character                    = FALSE,
     percent                      = FALSE,

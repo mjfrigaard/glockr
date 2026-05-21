@@ -230,6 +230,13 @@ test_that("without no_large, the threshold flags have no effect on output", {
 
 # === generated-file detection ================================================
 
+test_that("scc_by_file() with gen=FALSE leaves generated column all FALSE", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list("normal.R" = r_content, "gen.R" = gen_content))
+  result <- scc_by_file(dir)             # gen default is FALSE
+  expect_false(any(result$generated))    # even gen.R isn't flagged
+})
+
 test_that("scc_by_file() with gen=TRUE marks 'do not edit' files as generated", {
   skip_if_not(scc_available, "scc not on PATH")
   dir    <- make_test_dir(list("normal.R" = r_content, "gen.R" = gen_content))
@@ -282,6 +289,13 @@ test_that("generated_markers replaces default markers for generation detection",
 
 # === minified-file detection =================================================
 
+test_that("scc_by_file() with min=FALSE leaves minified column all FALSE", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list("normal.R" = r_content, "min.R" = min_content))
+  result <- scc_by_file(dir)             # min default is FALSE
+  expect_false(any(result$minified))     # even min.R isn't flagged
+})
+
 test_that("scc_by_file() with min=TRUE marks single-long-line files as minified", {
   skip_if_not(scc_available, "scc not on PATH")
   dir    <- make_test_dir(list("normal.R" = r_content, "min.R" = min_content))
@@ -320,6 +334,20 @@ test_that("min_gen_line_length overrides the minified detection threshold", {
   dir    <- make_test_dir(list("script.R" = r_content))
   result <- scc(dir, no_min = TRUE, min_gen_line_length = 5L)
   expect_equal(nrow(result), 0L)   # all R files excluded as "minified"
+})
+
+test_that("min_gen = TRUE marks both minified and generated files", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list(
+    "normal.R" = r_content,
+    "gen.R"    = gen_content,
+    "min.R"    = min_content
+  ))
+  result <- scc_by_file(dir, min_gen = TRUE)
+  expect_true (result[result$filename == "gen.R", ]$generated)
+  expect_true (result[result$filename == "min.R", ]$minified)
+  expect_false(result[result$filename == "normal.R", ]$generated)
+  expect_false(result[result$filename == "normal.R", ]$minified)
 })
 
 test_that("no_min_gen = TRUE excludes both minified and generated files", {
@@ -501,6 +529,33 @@ test_that("size_unit values return valid tibbles", {
     expect_s3_class(result, "tbl_df")
     expect_true(nrow(result) > 0L, info = paste("size_unit =", unit))
   }
+})
+
+test_that("character = TRUE returns a valid tibble (no schema change)", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list("script.R" = r_content))
+  result <- scc(dir, character = TRUE)
+  expect_s3_class(result, "tbl_df")
+  expect_true("R" %in% result$language)
+  expect_named(result,
+    c("language", "files", "lines", "code", "comments", "blanks",
+      "complexity", "weighted_complexity", "bytes", "uloc"))
+})
+
+test_that("verbose = TRUE doesn't corrupt the parsed tibble", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list("script.R" = r_content))
+  result <- scc(dir, verbose = TRUE)
+  expect_s3_class(result, "tbl_df")
+  expect_true("R" %in% result$language)
+})
+
+test_that("debug = TRUE doesn't corrupt the parsed tibble (DEBUG lines stripped)", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list("script.R" = r_content))
+  result <- scc(dir, debug = TRUE)
+  expect_s3_class(result, "tbl_df")
+  expect_true("R" %in% result$language)
 })
 
 

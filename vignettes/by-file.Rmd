@@ -37,12 +37,25 @@ library(gt)
 
 `scc_by_file()` expands results to one row per source file, adding `filename`, `location`, and logical flags for `generated` and `minified` files.
 
-```{r scc-by-file}
+```{r}
 rlang_by_file <- scc_by_file(rlang_path) 
-rlang_by_file[order(rlang_by_file$complexity, decreasing = TRUE), ] |> 
+str(rlang_by_file)
+```
+
+
+Let's take a look at this by `complexity`, and drop `location`, `bytes`, `generated`, and `minified`. 
+
+```{r rlang_by_file_cm}
+rlang_by_file_cm <- rlang_by_file[ , c("language", "filename", "lines", 
+                                        "blanks", "comments", "uloc", 
+                                        "complexity", "weighted_complexity")]
+rlang_by_file_cm[order(rlang_by_file_cm$complexity, decreasing = TRUE), ] |> 
   head(10) |> 
-  gt::gt(caption = "Top 10 Succinct Code Counter (rlang R package)", 
-         rowname_col = "language") 
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Top 10 Complex Files", 
+    subtitle = "by complexity", 
+    preheader = "rlang package")
 ```
 
 Filter to just the R source files and sort by complexity:
@@ -52,32 +65,42 @@ r_files <- scc_by_file(rlang_path, include_ext = "r")
 r_files_sub <- r_files[, c("filename", "lines", "code", "comments", "blanks", "complexity")]
 r_files_sub[order(r_files_sub$complexity, decreasing = TRUE), ] |> 
   head(10) |> 
-  gt::gt(caption = "Top 10 Complex R files (rlang R package)", 
-         rowname_col = "filename")
+  gt::gt() |> 
+  gt::tab_header(
+    title = "Top 10 Complex R Files", 
+    subtitle = "rlang package", 
+    preheader = "rlang package")
 ```
 
 ## Visualizing file composition
 
 With `ggplot2` and `tidyr` we can plot the code / comment / blank split for the most complex R source files.
 
-```{r plot, eval = scc_available}
+```{r plot-pkgs, eval = scc_available}
 library(ggplot2)
 library(tidyr)
+```
 
+```{r tidytop15lines, eval = scc_available}
 r_files <- scc_by_file(rlang_path, include_ext = "r")
-
-# keep the 15 files with the most lines
-top15 <- r_files[order(r_files$lines, decreasing = TRUE), ][1:15, ]
-
-long <- tidyr::pivot_longer(
-  top15,
-  cols      = c(code, comments, blanks),
-  names_to  = "type",
+# keep the 15 files with the highest lines of code
+top15lines <- r_files[order(r_files$lines, decreasing = TRUE), ][1:15, ]
+# tidy this
+tidytop15lines <- tidyr::pivot_longer(
+  data = top15lines,
+  cols = c(code, comments, blanks),
+  names_to = "type",
   values_to = "n_lines"
 )
-long$type <- factor(long$type, levels = c("blanks", "comments", "code"))
+# change to factor
+tidytop15lines$type <- factor(tidytop15lines$type, levels = c("blanks", "comments", "code"))
+# keep only needed columns
+tidytop15lines <- tidytop15lines[, c("n_lines", "type", "filename")]
+str(tidytop15lines)
+```
 
-ggplot2::ggplot(long, 
+```{r}
+ggplot2::ggplot(tidytop15lines, 
   ggplot2::aes(x = n_lines, y = reorder(filename, n_lines), fill = type)) +
   ggplot2::geom_col() +
   ggplot2::scale_fill_manual(
@@ -86,6 +109,42 @@ ggplot2::ggplot(long,
   ) +
   ggplot2::labs(
     title = "Stacked bar chart showing code, comment, and blank line counts for\nthe 15 largest R source files in rlang",
+    x     = "Lines",
+    y     = NULL,
+    fill  = NULL
+  ) +
+  ggplot2::theme_minimal(base_size = 11) +
+  ggplot2::theme(legend.position = "bottom")
+```
+
+
+```{r tidytop15cm, eval = scc_available}
+# keep the 15 files with the highest lines of code
+top15cm <- r_files[order(r_files$lines, decreasing = TRUE), ][1:15, ]
+# tidy this
+tidytop15cm <- tidyr::pivot_longer(
+  data = top15cm,
+  cols = c(complexity, weighted_complexity, uloc),
+  names_to = "c_metric",
+  values_to = "value"
+)
+# change to factor
+tidytop15cm$c_metric <- factor(tidytop15cm$c_metric, levels = c("uloc", "complexity", "weighted_complexity"))
+# keep only needed columns
+tidytop15cm <- tidytop15cm[, c("lines", "filename", "c_metric", "value")]
+str(tidytop15cm)
+```
+
+```{r plot-tidytop15cm, eval = scc_available}
+ggplot2::ggplot(tidytop15cm, 
+  ggplot2::aes(x = lines, y = reorder(filename, lines), fill = c_metric)) +
+  ggplot2::geom_col() +
+  ggplot2::scale_fill_manual(
+    values = c(weighted_complexity = "#2166ac", complexity = "#92c5de", uloc = "#d1e5f0"),
+    labels = c(weighted_complexity = "weighted complexity", complexity = "complexity", uloc = "uloc")
+  ) + 
+  ggplot2::labs(
+    title = "Stacked bar chart showing ULOC, complexity, and weighted\ncomplexity for the 15 largest R source files in rlang",
     x     = "Lines",
     y     = NULL,
     fill  = NULL
