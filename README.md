@@ -76,11 +76,11 @@ r_files_sub[order(r_files_sub$complexity, decreasing = TRUE), ]
 #   3 recoding-replacing.R   291   195       53     43          5
 #   4 dplyr.R                152    66       53     33          2
 #   5 window-functions.R     101    41       37     23          2
-#   6 grouping.R             143    81       29     33          2
-#   7 rowwise.R              203   112       50     41          2
+#   6 rowwise.R              203   112       50     41          2
+#   7 grouping.R             143    81       29     33          2
 #   8 colwise.R              173    96       43     34          0
-#   9 two-table.R             74    36       20     18          0
-#  10 in-packages.R           71    19       41     11          0
+#   9 in-packages.R           71    19       41     11          0
+#  10 two-table.R             74    36       20     18          0
 ```
 
 `scc` estimates cyclomatic complexity by counting control-flow keywords
@@ -101,8 +101,8 @@ r_files[order(-r_files$weighted_complexity),
 #   6 grouping.R              81          2                2.47
 #   7 rowwise.R              112          2                1.79
 #   8 colwise.R               96          0                0   
-#   9 two-table.R             36          0                0   
-#  10 in-packages.R           19          0                0
+#   9 in-packages.R           19          0                0   
+#  10 two-table.R             36          0                0
 ```
 
 `scc_languages()` returns every language `scc` recognizes, along with
@@ -138,20 +138,4 @@ head(langs, 10)
 #  10 Amber        ab
 ```
 
-``` r
-#> # A tibble: 10 × 2
-#>    language     extensions     
-#>    <chr>        <chr>          
-#>  1 ABAP         abap           
-#>  2 ABNF         abnf           
-#>  3 ActionScript as             
-#>  4 Ada          ada,adb,ads,pad
-#>  5 Agda         agda           
-#>  6 Alchemist    crn            
-#>  7 Alex         x              
-#>  8 Algol 68     a68            
-#>  9 Alloy        als            
-#> 10 Amber        ab
-```
-
-Last published: 2026-05-21 11:07:06.88825
+Last published: 2026-05-21 11:58:17.171005
