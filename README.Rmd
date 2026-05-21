@@ -87,21 +87,5 @@ Also includes the extensions:
 head(langs, 10)
 ```
 
-```{r}
-#> # A tibble: 10 × 2
-#>    language     extensions     
-#>    <chr>        <chr>          
-#>  1 ABAP         abap           
-#>  2 ABNF         abnf           
-#>  3 ActionScript as             
-#>  4 Ada          ada,adb,ads,pad
-#>  5 Agda         agda           
-#>  6 Alchemist    crn            
-#>  7 Alex         x              
-#>  8 Algol 68     a68            
-#>  9 Alloy        als            
-#> 10 Amber        ab
-```
-
 
 Last published: `r Sys.time()`
