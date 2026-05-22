@@ -1,3 +1,4 @@
+# LLM tooling artifacts (never commit)
 
 # Bundled external package sources (downloaded by vignettes at build time)
 inst/pkgs/
