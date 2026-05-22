@@ -1,5 +1,7 @@
-# Claude Code local config
+# LLM tooling artifacts (never commit)
 .claude/
+.positai/
+AGENTS.md
 
 # Bundled external package sources (downloaded by vignettes at build time)
 inst/pkgs/
