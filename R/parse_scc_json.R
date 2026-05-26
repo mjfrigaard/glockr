@@ -27,6 +27,15 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
     (as.double(complexity %||% 0) / code) * 100
   }
 
+  # scc's tabular DRYness = ULOC / Lines (formatters_tabular.go:185); compute
+  # the same ratio per record from the JSON. 0 when lines == 0 or uloc missing
+  # (i.e. uloc = FALSE and dryness = FALSE).
+  dryness <- function(uloc, lines) {
+    lines <- as.double(lines %||% 0)
+    if (is.na(lines) || lines == 0) return(0)
+    as.double(uloc %||% 0) / lines
+  }
+
   if (!nzchar(trimws(json_text))) return(empty_scc_tibble(by_file))
 
   # scc --debug writes diagnostic lines (e.g. "DEBUG ...") to stdout; strip them
@@ -49,7 +58,8 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
         complexity          = lang$Complexity,
         weighted_complexity = weighted_complexity(lang$Complexity, lang$Code),
         bytes               = lang$Bytes,
-        uloc                = lang$ULOC %||% 0L
+        uloc                = lang$ULOC %||% 0L,
+        dryness             = dryness(lang$ULOC, lang$Lines)
       )
     })
     do.call(rbind, rows)
@@ -71,6 +81,7 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
           weighted_complexity = weighted_complexity(f$Complexity, f$Code),
           bytes               = f$Bytes,
           uloc                = f$Uloc %||% 0L,
+          dryness             = dryness(f$Uloc, f$Lines),
           generated           = isTRUE(f$Generated),
           minified            = isTRUE(f$Minified)
         )

@@ -22,7 +22,8 @@ empty_scc_tibble <- function(by_file = FALSE) {
       complexity          = integer(),
       weighted_complexity = double(),
       bytes               = integer(),
-      uloc                = integer()
+      uloc                = integer(),
+      dryness             = double()
     )
   } else {
     tibble::tibble(
@@ -37,6 +38,7 @@ empty_scc_tibble <- function(by_file = FALSE) {
       weighted_complexity = double(),
       bytes               = integer(),
       uloc                = integer(),
+      dryness             = double(),
       generated           = logical(),
       minified            = logical()
     )

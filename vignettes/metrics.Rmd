@@ -64,29 +64,83 @@ r_files[order(-r_files$complexity),
 
 ## Unique lines of code
 
-`uloc = TRUE` asks `scc` to count *unique* lines of code (ULOC) — the number of distinct non-blank, non-comment lines. 
+`uloc` (Unique Lines Of Code) is enabled by default — pass `uloc = FALSE` to skip the calculation. Despite the name, `scc`'s per-record ULOC is the count of unique **non-blank** lines, which means **comments count toward ULOC**. SLOC (the `code` column) is just the raw count of non-blank, non-comment lines and includes duplicates.
+
+The clearest way to see the difference is two minimal fixtures bundled with the package:
+
+```r
+# inst/test/file/code.R           — pure code, 5 lines, two duplicate pairs
+x <- 1
+y <- 2
+x <- 1
+y <- 2
+z <- 3
+```
+
+```r
+# inst/test/file/code_w_comments.R — same code, plus three unique comments
+# step 1
+x <- 1
+y <- 2
+# step 2
+x <- 1
+y <- 2
+# step 3
+z <- 3
+```
+
+Running `scc_by_file()` on both:
+
+```{r uloc-fixtures}
+fixtures <- c(
+  system.file("test/file/code.R",            package = "glockr"),
+  system.file("test/file/code_w_comments.R", package = "glockr")
+)
+scc_by_file(fixtures)[, c("filename", "lines", "code",
+                          "comments", "uloc", "dryness")] |>
+  gt::gt() |>
+  gt::tab_header(
+    title    = "SLOC vs ULOC on minimal fixtures",
+    subtitle = "both files contain the same 5 code lines",
+    preheader = "inst/test/file/")
+```
+
+Two takeaways:
+
+1. **`code.R`**: SLOC = 5 but ULOC = 3. The lines `x <- 1` and `y <- 2` each appear twice; the unique-line set is `{x <- 1, y <- 2, z <- 3}`.
+2. **`code_w_comments.R`**: Same SLOC = 5, but ULOC = 6. The unique-non-blank set is `{# step 1, # step 2, # step 3, x <- 1, y <- 2, z <- 3}` — three distinct comments expand ULOC above SLOC.
+
+So **ULOC can be either smaller or larger than SLOC** depending on the mix of duplication and unique comments.
+
+### ULOC at scale
+
+The same calculation aggregates across an entire codebase:
 
 ```{r uloc}
 scc(rlang_path) |>
-  gt::gt() |> 
+  gt::gt() |>
   gt::tab_header(
-    title = "Succinct Code Counter", 
-    subtitle = "with ULOC calculations", 
+    title = "Succinct Code Counter",
+    subtitle = "per-language ULOC",
     preheader = "rlang package")
 ```
 
-`dryness = TRUE` also computes ULOC and additionally prints a DRYness score in the console (it has no extra effect on the returned tibble).
+### DRYness
+
+`dryness = uloc / lines` (matching `scc`'s `DRYness %` formula in its tabular output, applied per record instead of project-wide). Values close to 1 mean a file or language is mostly unique non-blank content; values closer to 0 mean heavy duplication, comments, or blanks.
+
+Note the `dryness = TRUE` flag here is unrelated to the column — it asks `scc` to print an extra `DRYness %` line in its tabular console output (which we never see because `glockr` always requests JSON). The `dryness` column is populated whenever `uloc = TRUE`.
 
 ```{r dryness}
-scc(rlang_path, dryness = TRUE) |>
-  gt::gt() |> 
+scc(rlang_path)[, c("language", "lines", "code", "uloc", "dryness")] |>
+  gt::gt() |>
   gt::tab_header(
-    title = "Succinct Code Counter", 
-    subtitle = "with dryness = TRUE", 
+    title = "Per-language DRYness",
+    subtitle = "dryness = uloc / lines",
     preheader = "rlang package")
 ```
 
-**The `uloc` column is now populated — for example, R has 23,837 unique code lines out of 28,038 total, suggesting about 15 % duplication across the codebase.**
+For rlang, the `R` language scores about 0.54 — roughly half of all physical R lines are unique non-blank content, with the remainder being either duplicates, blank lines, or repeated comment lines.
 
 ## Language remapping
 

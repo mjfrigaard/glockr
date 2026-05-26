@@ -43,6 +43,10 @@
 #'     \item{uloc}{Unique lines of code (integer). Populated by default
 #'       (`uloc = TRUE`); set `uloc = FALSE` to skip the calculation, in
 #'       which case the column is `0`.}
+#'     \item{dryness}{DRYness ratio for the row, computed locally as
+#'       `uloc / lines` (double; `0` when `lines == 0` or `uloc = FALSE`).
+#'       Matches the formula `scc` uses for its tabular `DRYness %` line,
+#'       applied per language instead of project-wide.}
 #'   }
 #'
 #' @export
