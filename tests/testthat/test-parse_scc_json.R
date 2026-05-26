@@ -120,7 +120,7 @@ test_that("parse_scc_json() has the correct columns for language-level output", 
   result <- glockr:::parse_scc_json(lang_json, by_file = FALSE)
   expect_named(result,
     c("language", "files", "lines", "code", "comments", "blanks",
-      "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
+      "complexity", "weighted_complexity", "bytes", "uloc"))
 })
 
 test_that("parse_scc_json() returns one row per language", {
@@ -140,8 +140,6 @@ test_that("parse_scc_json() maps JSON fields to the correct columns", {
   expect_equal(r_row$weighted_complexity, 50)
   expect_equal(r_row$bytes,            200L)
   expect_equal(r_row$uloc,              5L)
-  # dryness = uloc / lines = 5 / 10 = 0.5
-  expect_equal(r_row$dryness,           0.5)
 })
 
 test_that("parse_scc_json() column types are correct for language-level output", {
@@ -156,7 +154,22 @@ test_that("parse_scc_json() column types are correct for language-level output",
   expect_type(result$weighted_complexity, "double")
   expect_type(result$bytes,               "integer")
   expect_type(result$uloc,                "integer")
-  expect_type(result$dryness,             "double")
+})
+
+test_that("parse_scc_json(dryness = TRUE) adds the dryness column = uloc / lines", {
+  result <- glockr:::parse_scc_json(lang_json, by_file = FALSE, dryness = TRUE)
+  expect_true("dryness" %in% names(result))
+  expect_type(result$dryness, "double")
+  # R: uloc = 5, lines = 10 → 0.5; Python: uloc = 4, lines = 8 → 0.5
+  r_row  <- result[result$language == "R", ]
+  py_row <- result[result$language == "Python", ]
+  expect_equal(r_row$dryness,  0.5)
+  expect_equal(py_row$dryness, 0.5)
+})
+
+test_that("parse_scc_json() omits the dryness column by default", {
+  result <- glockr:::parse_scc_json(lang_json, by_file = FALSE)
+  expect_false("dryness" %in% names(result))
 })
 
 # --- parse_scc_json() by_file = TRUE ----------------------------------------
@@ -171,7 +184,7 @@ test_that("parse_scc_json() has the correct columns for by-file output", {
   expect_named(result,
     c("language", "filename", "location", "lines", "code", "comments",
       "blanks", "complexity", "weighted_complexity", "bytes",
-      "uloc", "dryness", "generated", "minified"))
+      "uloc", "generated", "minified"))
 })
 
 test_that("parse_scc_json() returns one row per file (languages without files dropped)", {
@@ -233,11 +246,11 @@ test_that("empty tibbles have the correct column schema", {
 
   expect_named(lang_empty,
     c("language", "files", "lines", "code", "comments", "blanks",
-      "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
+      "complexity", "weighted_complexity", "bytes", "uloc"))
   expect_named(by_file_empty,
     c("language", "filename", "location", "lines", "code", "comments",
       "blanks", "complexity", "weighted_complexity", "bytes",
-      "uloc", "dryness", "generated", "minified"))
+      "uloc", "generated", "minified"))
 })
 
 # --- empty_scc_tibble() direct tests -----------------------------------------
@@ -251,7 +264,7 @@ test_that("empty_scc_tibble(FALSE) returns a zero-row tibble", {
 test_that("empty_scc_tibble(FALSE) has the correct 10 columns", {
   result <- glockr:::empty_scc_tibble(FALSE)
   expect_named(result, c("language", "files", "lines", "code", "comments",
-    "blanks", "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
+    "blanks", "complexity", "weighted_complexity", "bytes", "uloc"))
 })
 
 test_that("empty_scc_tibble(FALSE) has correct column types", {
@@ -266,7 +279,15 @@ test_that("empty_scc_tibble(FALSE) has correct column types", {
   expect_type(result$weighted_complexity, "double")
   expect_type(result$bytes,               "integer")
   expect_type(result$uloc,                "integer")
-  expect_type(result$dryness,             "double")
+})
+
+test_that("empty_scc_tibble(dryness = TRUE) appends the dryness column", {
+  lang_empty    <- glockr:::empty_scc_tibble(FALSE, dryness = TRUE)
+  by_file_empty <- glockr:::empty_scc_tibble(TRUE,  dryness = TRUE)
+  expect_true("dryness" %in% names(lang_empty))
+  expect_true("dryness" %in% names(by_file_empty))
+  expect_type(lang_empty$dryness,    "double")
+  expect_type(by_file_empty$dryness, "double")
 })
 
 test_that("empty_scc_tibble(TRUE) returns a zero-row tibble", {
@@ -279,7 +300,7 @@ test_that("empty_scc_tibble(TRUE) has the correct 14 columns", {
   result <- glockr:::empty_scc_tibble(TRUE)
   expect_named(result, c("language", "filename", "location", "lines", "code",
     "comments", "blanks", "complexity", "weighted_complexity", "bytes",
-    "uloc", "dryness", "generated", "minified"))
+    "uloc", "generated", "minified"))
 })
 
 test_that("empty_scc_tibble(TRUE) has correct column types", {
@@ -295,7 +316,6 @@ test_that("empty_scc_tibble(TRUE) has correct column types", {
   expect_type(result$weighted_complexity, "double")
   expect_type(result$bytes,               "integer")
   expect_type(result$uloc,                "integer")
-  expect_type(result$dryness,             "double")
   expect_type(result$generated,           "logical")
   expect_type(result$minified,            "logical")
 })

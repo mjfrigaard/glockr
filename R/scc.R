@@ -43,10 +43,12 @@
 #'     \item{uloc}{Unique lines of code (integer). Populated by default
 #'       (`uloc = TRUE`); set `uloc = FALSE` to skip the calculation, in
 #'       which case the column is `0`.}
-#'     \item{dryness}{DRYness ratio for the row, computed locally as
-#'       `uloc / lines` (double; `0` when `lines == 0` or `uloc = FALSE`).
-#'       Matches the formula `scc` uses for its tabular `DRYness %` line,
-#'       applied per language instead of project-wide.}
+#'     \item{dryness}{**Only present when `dryness = TRUE`** (default
+#'       `FALSE`). DRYness ratio for the row, computed locally as
+#'       `uloc / lines` (double; `0` when `lines == 0`). Matches the
+#'       formula `scc` uses for its tabular `DRYness %` line, applied per
+#'       language instead of project-wide. Passing `dryness = TRUE`
+#'       auto-promotes `uloc` to `TRUE` since the formula needs it.}
 #'   }
 #'
 #' @export
@@ -114,6 +116,9 @@ scc <- function(
     file_summary_job_queue_size  = NULL) {
 
   scc_bin <- find_scc()
+  # dryness depends on uloc; auto-promote so the formula has the numerator
+  if (isTRUE(dryness)) uloc <- TRUE
+
   args <- build_args(
     sort                         = sort,
     by_file                      = FALSE,
@@ -165,7 +170,7 @@ scc <- function(
   res <- processx::run(scc_bin, args = args, error_on_status = FALSE)
   if (res$status != 0L) stop("scc failed:\n", res$stderr, call. = FALSE)
 
-  scc_tbl <- parse_scc_json(res$stdout, by_file = FALSE)
+  scc_tbl <- parse_scc_json(res$stdout, by_file = FALSE, dryness = dryness)
 
   if (!isTRUE(cocomo)) return(scc_tbl)
 

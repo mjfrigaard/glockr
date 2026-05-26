@@ -96,8 +96,8 @@ fixtures <- c(
   system.file("test/file/code.R",            package = "glockr"),
   system.file("test/file/code_w_comments.R", package = "glockr")
 )
-scc_by_file(fixtures)[, c("filename", "lines", "code",
-                          "comments", "uloc", "dryness")] |>
+scc_by_file(fixtures, dryness = TRUE)[, c("filename", "lines", "code",
+                                          "comments", "uloc", "dryness")] |>
   gt::gt() |>
   gt::tab_header(
     title    = "SLOC vs ULOC on minimal fixtures",
@@ -127,12 +127,11 @@ scc(rlang_path) |>
 
 ### DRYness
 
-`dryness = uloc / lines` (matching `scc`'s `DRYness %` formula in its tabular output, applied per record instead of project-wide). Values close to 1 mean a file or language is mostly unique non-blank content; values closer to 0 mean heavy duplication, comments, or blanks.
-
-Note the `dryness = TRUE` flag here is unrelated to the column — it asks `scc` to print an extra `DRYness %` line in its tabular console output (which we never see because `glockr` always requests JSON). The `dryness` column is populated whenever `uloc = TRUE`.
+The `dryness` column is **opt-in**: pass `dryness = TRUE` to either `scc()` or `scc_by_file()` and a `dryness` column appears in the returned tibble, computed locally as `uloc / lines` (matching `scc`'s `DRYness %` formula in its tabular output, applied per record instead of project-wide). Values close to 1 mean a file or language is mostly unique non-blank content; values closer to 0 mean heavy duplication, comments, or blanks. Since the formula needs `uloc`, passing `dryness = TRUE` also auto-promotes `uloc` to `TRUE` even if you explicitly set it to `FALSE`.
 
 ```{r dryness}
-scc(rlang_path)[, c("language", "lines", "code", "uloc", "dryness")] |>
+scc(rlang_path, dryness = TRUE)[, c("language", "lines", "code",
+                                    "uloc", "dryness")] |>
   gt::gt() |>
   gt::tab_header(
     title = "Per-language DRYness",

@@ -8,6 +8,9 @@
 #' @param by_file Logical. When `TRUE` unpacks the per-file `Files` array
 #'   inside each language block; when `FALSE` (default) returns one row per
 #'   language.
+#' @param dryness Logical. When `TRUE` the returned tibble includes a
+#'   `dryness` column (`uloc / lines`); when `FALSE` (default) the column
+#'   is omitted.
 #'
 #' @return A [tibble::tibble()]. Column layout matches [scc()] when
 #'   `by_file = FALSE` and [scc_by_file()] when `by_file = TRUE`.
@@ -20,7 +23,7 @@
 #' json_by_file <- processx::run("scc", c("--format", "json", "--by-file", "."))$stdout
 #' parse_scc_json(json_by_file, by_file = TRUE)
 #' }
-parse_scc_json <- function(json_text, by_file = FALSE) {
+parse_scc_json <- function(json_text, by_file = FALSE, dryness = FALSE) {
   weighted_complexity <- function(complexity, code) {
     code <- as.double(code %||% 0)
     if (is.na(code) || code == 0) return(0)
@@ -29,22 +32,25 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
 
   # scc's tabular DRYness = ULOC / Lines (formatters_tabular.go:185); compute
   # the same ratio per record from the JSON. 0 when lines == 0 or uloc missing
-  # (i.e. uloc = FALSE and dryness = FALSE).
-  dryness <- function(uloc, lines) {
+  # (i.e. uloc = FALSE).
+  dryness_ratio <- function(uloc, lines) {
     lines <- as.double(lines %||% 0)
     if (is.na(lines) || lines == 0) return(0)
     as.double(uloc %||% 0) / lines
   }
 
-  if (!nzchar(trimws(json_text))) return(empty_scc_tibble(by_file))
+  if (!nzchar(trimws(json_text)))
+    return(empty_scc_tibble(by_file, dryness = dryness))
 
   # scc --debug writes diagnostic lines (e.g. "DEBUG ...") to stdout; strip them
   lines     <- strsplit(json_text, "\n", fixed = TRUE)[[1L]]
   json_text <- paste(lines[!grepl("^(DEBUG|VERBOSE)\\s", lines)], collapse = "\n")
-  if (!nzchar(trimws(json_text))) return(empty_scc_tibble(by_file))
+  if (!nzchar(trimws(json_text)))
+    return(empty_scc_tibble(by_file, dryness = dryness))
 
   raw <- jsonlite::fromJSON(json_text, simplifyVector = FALSE)
-  if (length(raw) == 0L) return(empty_scc_tibble(by_file))
+  if (length(raw) == 0L)
+    return(empty_scc_tibble(by_file, dryness = dryness))
 
   if (!by_file) {
     rows <- lapply(raw, function(lang) {
@@ -59,10 +65,10 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
         weighted_complexity = weighted_complexity(lang$Complexity, lang$Code),
         bytes               = lang$Bytes,
         uloc                = lang$ULOC %||% 0L,
-        dryness             = dryness(lang$ULOC, lang$Lines)
+        dryness             = dryness_ratio(lang$ULOC, lang$Lines)
       )
     })
-    do.call(rbind, rows)
+    result <- do.call(rbind, rows)
   } else {
     rows <- lapply(raw, function(lang) {
       lang_name <- lang$Name
@@ -81,14 +87,17 @@ parse_scc_json <- function(json_text, by_file = FALSE) {
           weighted_complexity = weighted_complexity(f$Complexity, f$Code),
           bytes               = f$Bytes,
           uloc                = f$Uloc %||% 0L,
-          dryness             = dryness(f$Uloc, f$Lines),
+          dryness             = dryness_ratio(f$Uloc, f$Lines),
           generated           = isTRUE(f$Generated),
           minified            = isTRUE(f$Minified)
         )
       })
     })
-    rows <- unlist(rows, recursive = FALSE)
-    rows <- Filter(Negate(is.null), rows)
-    do.call(rbind, rows)
+    rows   <- unlist(rows, recursive = FALSE)
+    rows   <- Filter(Negate(is.null), rows)
+    result <- do.call(rbind, rows)
   }
+
+  if (!isTRUE(dryness)) result$dryness <- NULL
+  result
 }
