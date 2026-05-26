@@ -236,10 +236,12 @@ complexity.}
 \item{uloc}{Unique lines of code (integer). Populated by default
 (\code{uloc = TRUE}); set \code{uloc = FALSE} to skip the calculation, in
 which case the column is \code{0}.}
-\item{dryness}{DRYness ratio for the file, computed locally as
-\code{uloc / lines} (double; \code{0} when \code{lines == 0} or \code{uloc = FALSE}).
-Matches the formula \code{scc} uses for its tabular \verb{DRYness \%} line,
-applied per file instead of project-wide.}
+\item{dryness}{\strong{Only present when \code{dryness = TRUE}} (default
+\code{FALSE}). DRYness ratio for the file, computed locally as
+\code{uloc / lines} (double; \code{0} when \code{lines == 0}). Matches the
+formula \code{scc} uses for its tabular \verb{DRYness \%} line, applied per
+file instead of project-wide. Passing \code{dryness = TRUE}
+auto-promotes \code{uloc} to \code{TRUE} since the formula needs it.}
 \item{generated}{\code{TRUE} if file is auto-generated (logical).}
 \item{minified}{\code{TRUE} if file is minified (logical).}
 }

@@ -82,27 +82,38 @@ test_that("dryness = TRUE populates the uloc column (dryness implies uloc)", {
   expect_true(all(result$uloc > 0L))
 })
 
-test_that("dryness column equals uloc / lines for each row", {
+test_that("scc() omits the dryness column by default", {
   skip_if_not(scc_available, "scc not on PATH")
   dir    <- make_test_dir(list("script.R" = r_content))
   result <- scc(dir)
+  expect_false("dryness" %in% names(result))
+})
+
+test_that("scc(dryness = TRUE) adds a dryness column = uloc / lines", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list("script.R" = r_content))
+  result <- scc(dir, dryness = TRUE)
+  expect_true("dryness" %in% names(result))
   expect_equal(result$dryness, result$uloc / result$lines)
   expect_true(all(result$dryness >= 0 & result$dryness <= 1))
 })
 
-test_that("scc_by_file() dryness column equals uloc / lines per file", {
+test_that("scc_by_file(dryness = TRUE) adds dryness column = uloc / lines", {
   skip_if_not(scc_available, "scc not on PATH")
   dir    <- make_test_dir(list("a.R" = r_content, "b.R" = r_content))
-  result <- scc_by_file(dir)
+  result <- scc_by_file(dir, dryness = TRUE)
+  expect_true("dryness" %in% names(result))
   expect_equal(result$dryness, result$uloc / result$lines)
   expect_type(result$dryness, "double")
 })
 
-test_that("uloc = FALSE forces dryness to 0", {
+test_that("scc(dryness = TRUE) auto-promotes uloc when user passed FALSE", {
   skip_if_not(scc_available, "scc not on PATH")
   dir    <- make_test_dir(list("script.R" = r_content))
-  result <- scc(dir, uloc = FALSE)
-  expect_true(all(result$dryness == 0))
+  result <- scc(dir, dryness = TRUE, uloc = FALSE)
+  # auto-promotion: uloc must be populated and dryness must be nonzero
+  expect_true(all(result$uloc > 0L))
+  expect_true(all(result$dryness > 0))
 })
 
 
@@ -562,7 +573,7 @@ test_that("character = TRUE returns a valid tibble (no schema change)", {
   expect_true("R" %in% result$language)
   expect_named(result,
     c("language", "files", "lines", "code", "comments", "blanks",
-      "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
+      "complexity", "weighted_complexity", "bytes", "uloc"))
 })
 
 test_that("verbose = TRUE doesn't corrupt the parsed tibble", {
@@ -665,5 +676,5 @@ test_that("character = TRUE still returns a valid tibble with correct columns", 
   expect_s3_class(result, "tbl_df")
   expect_named(result,
     c("language", "files", "lines", "code", "comments", "blanks",
-      "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
+      "complexity", "weighted_complexity", "bytes", "uloc"))
 })

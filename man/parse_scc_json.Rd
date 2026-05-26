@@ -4,7 +4,7 @@
 \alias{parse_scc_json}
 \title{Parse JSON output from scc into a tibble}
 \usage{
-parse_scc_json(json_text, by_file = FALSE)
+parse_scc_json(json_text, by_file = FALSE, dryness = FALSE)
 }
 \arguments{
 \item{json_text}{Character scalar: raw stdout captured from \code{scc}.}
@@ -12,6 +12,10 @@ parse_scc_json(json_text, by_file = FALSE)
 \item{by_file}{Logical. When \code{TRUE} unpacks the per-file \code{Files} array
 inside each language block; when \code{FALSE} (default) returns one row per
 language.}
+
+\item{dryness}{Logical. When \code{TRUE} the returned tibble includes a
+\code{dryness} column (\code{uloc / lines}); when \code{FALSE} (default) the column
+is omitted.}
 }
 \value{
 A \code{\link[tibble:tibble]{tibble::tibble()}}. Column layout matches \code{\link[=scc]{scc()}} when

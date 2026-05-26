@@ -4,16 +4,19 @@
 \alias{empty_scc_tibble}
 \title{Return an empty tibble with the correct schema}
 \usage{
-empty_scc_tibble(by_file = FALSE)
+empty_scc_tibble(by_file = FALSE, dryness = FALSE)
 }
 \arguments{
-\item{by_file}{Logical. When \code{TRUE} returns the per-file schema (12
-columns); when \code{FALSE} (default) returns the per-language schema (10
-columns).}
+\item{by_file}{Logical. When \code{TRUE} returns the per-file schema; when
+\code{FALSE} (default) returns the per-language schema.}
+
+\item{dryness}{Logical. When \code{TRUE} includes the \code{dryness} column; when
+\code{FALSE} (default) the column is omitted, matching the runtime gate in
+\code{\link[=scc]{scc()}} / \code{\link[=scc_by_file]{scc_by_file()}}.}
 }
 \value{
 A zero-row \code{\link[tibble:tibble]{tibble::tibble()}} whose columns and types match the
-output of \code{\link[=scc]{scc()}} (\code{by_file = FALSE}) or \code{\link[=scc_by_file]{scc_by_file()}} (\code{by_file = TRUE}).
+output of \code{\link[=scc]{scc()}} (\code{by_file = FALSE}) or \code{\link[=scc_by_file]{scc_by_file()}} (\code{by_file = TRUE}) called with the same \code{dryness} flag.
 }
 \description{
 Used as a safe fallback when \code{scc} produces no output (e.g. an empty
