@@ -35,7 +35,27 @@ library(gt)
 
 ## Complexity metrics
 
-`scc` estimates cyclomatic complexity by counting control-flow keywords (`if`, `for`, `while`, etc.). The `complexity` column is the raw total.
+`scc`'s `complexity` column is an *approximation* of [cyclomatic complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity) — not a true measurement. It's computed without parsing the code into an AST: while `scc` is already scanning each file for line classification, it also increments a per-file counter every time it sees a token that typically introduces a branch. The exact token set depends on the language; in Java, for example, each of `for`, `if`, `switch`, `while`, `else`, `||`, `&&`, `!=`, and `==` adds 1.
+
+A few caveats from scc's own [README](https://github.com/boyter/scc/blob/master/README.md#complexity-estimates) worth carrying into any analysis:
+
+* **Same-language comparisons only.** The counter is calculated by looking for the branch tokens of a particular language; languages with fewer such tokens (or that rely on recursion instead of loops) score lower without being intrinsically simpler. Use `complexity` to rank files / projects *within* the same language, not to compare R against C.
+* **No AST, by design.** The trade-off is speed: the count is essentially free during the regular pass, but recursive methods or other non-branching constructs are not picked up.
+* **Practical use.** The most common pattern is finding the most complex files in a project. With `glockr` that's:
+
+```{r top-complex}
+r_files <- scc_by_file(rlang_path, include_ext = "r")
+r_files[order(-r_files$complexity),
+        c("filename", "code", "complexity")] |>
+  head(10) |>
+  gt::gt() |>
+  gt::tab_header(
+    title    = "Top 10 most complex .R files",
+    subtitle = "raw branch-token count",
+    preheader = "rlang package")
+```
+
+The `complexity` column is the raw branch-token count per record.
 
 ### Weighted complexity 
 
@@ -47,19 +67,17 @@ weighted_complexity = (complexity / code) * 100      # 0 when code == 0
 
 Note that `scc`'s JSON formatter does **not** populate `WeightedComplexity` (the field is emitted as `0` regardless of input), so `glockr` computes the value itself from `complexity` and `code`. For `scc_by_file()` this matches `scc`'s per-file value exactly; for `scc()` the same formula is applied to each language's aggregate totals.
 
-```{r complexity}
-r_files <- scc_by_file(rlang_path, include_ext = "r")
-```
+Sorting the same files by `weighted_complexity` instead surfaces small-but-dense files that the raw count under-emphasises (a 30-line file with complexity = 11 will rank higher than a 300-line file with complexity = 15):
 
-```{r}
-r_files[order(-r_files$complexity),
+```{r weighted-complexity-top}
+r_files[order(-r_files$weighted_complexity),
         c("filename", "code", "complexity", "weighted_complexity")] |>
   head(10) |>
-  gt::gt() |> 
+  gt::gt() |>
   gt::tab_header(
-    title = "Top 10 Complex files", 
-    subtitle = ".R files", 
-    preheader = "rlang package")
+    title    = "Top 10 by weighted complexity",
+    subtitle = "complexity per 100 lines of code",
+    preheader = "rlang package (.R files)")
 ```
 
 ## Unique lines of code
