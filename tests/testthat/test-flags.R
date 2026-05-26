@@ -82,6 +82,29 @@ test_that("dryness = TRUE populates the uloc column (dryness implies uloc)", {
   expect_true(all(result$uloc > 0L))
 })
 
+test_that("dryness column equals uloc / lines for each row", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list("script.R" = r_content))
+  result <- scc(dir)
+  expect_equal(result$dryness, result$uloc / result$lines)
+  expect_true(all(result$dryness >= 0 & result$dryness <= 1))
+})
+
+test_that("scc_by_file() dryness column equals uloc / lines per file", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list("a.R" = r_content, "b.R" = r_content))
+  result <- scc_by_file(dir)
+  expect_equal(result$dryness, result$uloc / result$lines)
+  expect_type(result$dryness, "double")
+})
+
+test_that("uloc = FALSE forces dryness to 0", {
+  skip_if_not(scc_available, "scc not on PATH")
+  dir    <- make_test_dir(list("script.R" = r_content))
+  result <- scc(dir, uloc = FALSE)
+  expect_true(all(result$dryness == 0))
+})
+
 
 # === sort ====================================================================
 
@@ -539,7 +562,7 @@ test_that("character = TRUE returns a valid tibble (no schema change)", {
   expect_true("R" %in% result$language)
   expect_named(result,
     c("language", "files", "lines", "code", "comments", "blanks",
-      "complexity", "weighted_complexity", "bytes", "uloc"))
+      "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
 })
 
 test_that("verbose = TRUE doesn't corrupt the parsed tibble", {
@@ -642,5 +665,5 @@ test_that("character = TRUE still returns a valid tibble with correct columns", 
   expect_s3_class(result, "tbl_df")
   expect_named(result,
     c("language", "files", "lines", "code", "comments", "blanks",
-      "complexity", "weighted_complexity", "bytes", "uloc"))
+      "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
 })

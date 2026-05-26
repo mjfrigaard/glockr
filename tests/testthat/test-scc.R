@@ -100,7 +100,7 @@ test_that("scc() has the expected column names", {
   result <- scc(dir)
   expect_named(result,
     c("language", "files", "lines", "code", "comments", "blanks",
-      "complexity", "weighted_complexity", "bytes", "uloc"))
+      "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
 })
 
 test_that("scc() counts lines = code + comments + blanks", {
@@ -233,7 +233,7 @@ test_that("scc_by_file() has the expected column names", {
   expect_named(result,
     c("language", "filename", "location", "lines", "code", "comments",
       "blanks", "complexity", "weighted_complexity", "bytes",
-      "uloc", "generated", "minified"))
+      "uloc", "dryness", "generated", "minified"))
 })
 
 test_that("scc_by_file() returns one row per file", {

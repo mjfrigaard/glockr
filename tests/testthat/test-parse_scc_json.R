@@ -120,7 +120,7 @@ test_that("parse_scc_json() has the correct columns for language-level output", 
   result <- glockr:::parse_scc_json(lang_json, by_file = FALSE)
   expect_named(result,
     c("language", "files", "lines", "code", "comments", "blanks",
-      "complexity", "weighted_complexity", "bytes", "uloc"))
+      "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
 })
 
 test_that("parse_scc_json() returns one row per language", {
@@ -140,6 +140,8 @@ test_that("parse_scc_json() maps JSON fields to the correct columns", {
   expect_equal(r_row$weighted_complexity, 50)
   expect_equal(r_row$bytes,            200L)
   expect_equal(r_row$uloc,              5L)
+  # dryness = uloc / lines = 5 / 10 = 0.5
+  expect_equal(r_row$dryness,           0.5)
 })
 
 test_that("parse_scc_json() column types are correct for language-level output", {
@@ -154,6 +156,7 @@ test_that("parse_scc_json() column types are correct for language-level output",
   expect_type(result$weighted_complexity, "double")
   expect_type(result$bytes,               "integer")
   expect_type(result$uloc,                "integer")
+  expect_type(result$dryness,             "double")
 })
 
 # --- parse_scc_json() by_file = TRUE ----------------------------------------
@@ -168,7 +171,7 @@ test_that("parse_scc_json() has the correct columns for by-file output", {
   expect_named(result,
     c("language", "filename", "location", "lines", "code", "comments",
       "blanks", "complexity", "weighted_complexity", "bytes",
-      "uloc", "generated", "minified"))
+      "uloc", "dryness", "generated", "minified"))
 })
 
 test_that("parse_scc_json() returns one row per file (languages without files dropped)", {
@@ -230,11 +233,11 @@ test_that("empty tibbles have the correct column schema", {
 
   expect_named(lang_empty,
     c("language", "files", "lines", "code", "comments", "blanks",
-      "complexity", "weighted_complexity", "bytes", "uloc"))
+      "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
   expect_named(by_file_empty,
     c("language", "filename", "location", "lines", "code", "comments",
       "blanks", "complexity", "weighted_complexity", "bytes",
-      "uloc", "generated", "minified"))
+      "uloc", "dryness", "generated", "minified"))
 })
 
 # --- empty_scc_tibble() direct tests -----------------------------------------
@@ -248,7 +251,7 @@ test_that("empty_scc_tibble(FALSE) returns a zero-row tibble", {
 test_that("empty_scc_tibble(FALSE) has the correct 10 columns", {
   result <- glockr:::empty_scc_tibble(FALSE)
   expect_named(result, c("language", "files", "lines", "code", "comments",
-    "blanks", "complexity", "weighted_complexity", "bytes", "uloc"))
+    "blanks", "complexity", "weighted_complexity", "bytes", "uloc", "dryness"))
 })
 
 test_that("empty_scc_tibble(FALSE) has correct column types", {
@@ -263,6 +266,7 @@ test_that("empty_scc_tibble(FALSE) has correct column types", {
   expect_type(result$weighted_complexity, "double")
   expect_type(result$bytes,               "integer")
   expect_type(result$uloc,                "integer")
+  expect_type(result$dryness,             "double")
 })
 
 test_that("empty_scc_tibble(TRUE) returns a zero-row tibble", {
@@ -271,11 +275,11 @@ test_that("empty_scc_tibble(TRUE) returns a zero-row tibble", {
   expect_equal(nrow(result), 0L)
 })
 
-test_that("empty_scc_tibble(TRUE) has the correct 13 columns", {
+test_that("empty_scc_tibble(TRUE) has the correct 14 columns", {
   result <- glockr:::empty_scc_tibble(TRUE)
   expect_named(result, c("language", "filename", "location", "lines", "code",
     "comments", "blanks", "complexity", "weighted_complexity", "bytes",
-    "uloc", "generated", "minified"))
+    "uloc", "dryness", "generated", "minified"))
 })
 
 test_that("empty_scc_tibble(TRUE) has correct column types", {
@@ -290,6 +294,8 @@ test_that("empty_scc_tibble(TRUE) has correct column types", {
   expect_type(result$complexity,          "integer")
   expect_type(result$weighted_complexity, "double")
   expect_type(result$bytes,               "integer")
+  expect_type(result$uloc,                "integer")
+  expect_type(result$dryness,             "double")
   expect_type(result$generated,           "logical")
   expect_type(result$minified,            "logical")
 })
