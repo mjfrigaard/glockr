@@ -15,18 +15,22 @@ BugReports: https://github.com/mjfrigaard/glockr/issues
 Imports:
     jsonlite,
     processx,
-    tibble
+    tibble,
+    utils
 Suggests:
+    ggiraph,
     ggplot2,
     gt,
     knitr,
+    packcircles,
     rmarkdown,
     testthat (>= 3.0.0),
     tidyr,
     withr
-VignetteBuilder: knitr
+VignetteBuilder: 
+    knitr
+Config/roxygen2/version: 8.0.0
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 SystemRequirements: scc (https://github.com/boyter/scc)
-Config/roxygen2/version: 8.0.0

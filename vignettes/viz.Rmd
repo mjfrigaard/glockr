@@ -1,0 +1,226 @@
+---
+title: "Visualization"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 4
+vignette: >
+  %\VignetteIndexEntry{Visualization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "# ",
+  fig.path  = "../man/figures/",
+  fig.width = 7,
+  fig.height = 5
+)
+
+scc_available <- nchar(Sys.which("scc")) > 0L
+rlang_path    <- glockr:::fetch_rlang_source()
+if (is.na(rlang_path)) {
+  message("rlang source unavailable; downstream chunks shown but not evaluated.")
+  knitr::opts_chunk$set(eval = FALSE)
+  rlang_path <- ""
+}
+```
+
+```{r library}
+library(glockr)
+library(ggplot2)
+library(tidyr)
+```
+
+This vignette collects ways of plotting `scc_by_file()` output. Each section pulls the rlang source via `glockr:::fetch_rlang_source()` and filters to `.R` files.
+
+## Code / comment / blank composition
+
+Stacked bar of the line composition for the 15 largest R source files:
+
+```{r tidytop15lines}
+r_files    <- scc_by_file(rlang_path, include_ext = "r")
+top15lines <- r_files[order(r_files$lines, decreasing = TRUE), ][1:15, ]
+
+tidytop15lines <- tidyr::pivot_longer(
+  data      = top15lines,
+  cols      = c(code, comments, blanks),
+  names_to  = "type",
+  values_to = "n_lines"
+)
+tidytop15lines$type <- factor(
+  tidytop15lines$type,
+  levels = c("blanks", "comments", "code")
+)
+```
+
+```{r plot-composition}
+ggplot2::ggplot(tidytop15lines,
+  ggplot2::aes(x = n_lines, y = reorder(filename, n_lines), fill = type)) +
+  ggplot2::geom_col() +
+  ggplot2::scale_fill_manual(
+    values = c(code = "#2166ac", comments = "#92c5de", blanks = "#d1e5f0"),
+    labels = c(code = "Code", comments = "Comments", blanks = "Blanks")
+  ) +
+  ggplot2::labs(
+    title = "Line composition for the 15 largest R source files in rlang",
+    x     = "Lines",
+    y     = NULL,
+    fill  = NULL
+  ) +
+  ggplot2::theme_minimal(base_size = 11) +
+  ggplot2::theme(legend.position = "bottom")
+```
+
+## Complexity and ULOC by file
+
+Same files, but now stacking the three per-file numeric metrics that scale with size:
+
+```{r tidytop15cm}
+top15cm <- r_files[order(r_files$lines, decreasing = TRUE), ][1:15, ]
+
+tidytop15cm <- tidyr::pivot_longer(
+  data      = top15cm,
+  cols      = c(complexity, weighted_complexity, uloc),
+  names_to  = "c_metric",
+  values_to = "value"
+)
+tidytop15cm$c_metric <- factor(
+  tidytop15cm$c_metric,
+  levels = c("uloc", "complexity", "weighted_complexity")
+)
+```
+
+```{r plot-tidytop15cm}
+ggplot2::ggplot(tidytop15cm,
+  ggplot2::aes(x = lines, y = reorder(filename, lines), fill = c_metric)) +
+  ggplot2::geom_col() +
+  ggplot2::scale_fill_manual(
+    values = c(weighted_complexity = "#2166ac",
+               complexity          = "#92c5de",
+               uloc                = "#d1e5f0"),
+    labels = c(weighted_complexity = "weighted complexity",
+               complexity          = "complexity",
+               uloc                = "uloc")
+  ) +
+  ggplot2::labs(
+    title = "ULOC, complexity, and weighted complexity for the 15 largest R files",
+    x     = "Lines",
+    y     = NULL,
+    fill  = NULL
+  ) +
+  ggplot2::theme_minimal(base_size = 11) +
+  ggplot2::theme(legend.position = "bottom")
+```
+
+## Complexity vs. DRYness as a circle pack
+
+Each circle is one R source file. **Circle area** is the file's `weighted_complexity` (complexity per 100 LOC), so files that pack more branching per line are larger. **Fill colour** is the file's `dryness` (`uloc / lines`); darker hues mean more duplication relative to physical line count, lighter hues mean more unique non-blank content.
+
+```{r r_files_dryness}
+r_files <- scc_by_file(rlang_path, include_ext = "r", dryness = TRUE)
+# Drop files with zero weighted_complexity (nothing to size the circle by).
+r_files <- r_files[r_files$weighted_complexity > 0, ]
+str(r_files[, c("filename", "weighted_complexity", "dryness")])
+```
+
+Compute the circle layout with `packcircles::circleProgressiveLayout()` (area-proportional sizing) and turn it into polygon vertices for `ggplot2`. Tag every polygon vertex with the filename, weighted complexity, and dryness it belongs to so the static and interactive plots can both render labels:
+
+```{r circle-pack-data}
+packing            <- packcircles::circleProgressiveLayout(
+  r_files$weighted_complexity, sizetype = "area"
+)
+packing$filename            <- r_files$filename
+packing$weighted_complexity <- r_files$weighted_complexity
+packing$dryness             <- r_files$dryness
+
+polygons <- packcircles::circleLayoutVertices(packing, npoints = 60)
+polygons$filename            <- r_files$filename[polygons$id]
+polygons$weighted_complexity <- r_files$weighted_complexity[polygons$id]
+polygons$dryness             <- r_files$dryness[polygons$id]
+```
+
+### Static — top-N labelled
+
+To keep the figure readable, only the top 10 circles by weighted complexity get a text label. Smaller circles still render but stay anonymous; their info is recoverable from the interactive version below.
+
+```{r circle-pack-static}
+top_labels <- packing[order(-packing$weighted_complexity), ][seq_len(10), ]
+
+ggplot2::ggplot(polygons,
+                ggplot2::aes(x, y, group = id, fill = dryness)) +
+  ggplot2::geom_polygon(colour = "white", linewidth = 0.2) +
+  ggplot2::geom_text(
+    data    = top_labels,
+    mapping = ggplot2::aes(x = x, y = y, label = filename),
+    inherit.aes = FALSE,
+    size     = 3,
+    colour   = "white",
+    fontface = "bold"
+  ) +
+  ggplot2::scale_fill_viridis_c(
+    name    = "DRYness\n(uloc / lines)",
+    option  = "viridis",
+    limits  = c(0, 1)
+  ) +
+  ggplot2::coord_equal() +
+  ggplot2::labs(
+    title    = "rlang R files: complexity vs. DRYness",
+    subtitle = "circle area = weighted complexity; fill = uloc / lines; top 10 labelled",
+    caption  = "scc_by_file(..., dryness = TRUE)"
+  ) +
+  ggplot2::theme_void(base_size = 11) +
+  ggplot2::theme(
+    plot.title      = ggplot2::element_text(face = "bold"),
+    legend.position = "right"
+  )
+```
+
+### Interactive — hover every circle
+
+Same layout, but rendered via [`ggiraph`](https://davidgohel.github.io/ggiraph/) so each circle is its own SVG element with a tooltip. Hover any circle to read the file's name, weighted complexity, and DRYness — including the small ones that the static plot doesn't label.
+
+```{r circle-pack-interactive}
+gg_interactive <- ggplot2::ggplot(polygons,
+                                  ggplot2::aes(x, y, group = id, fill = dryness)) +
+  ggiraph::geom_polygon_interactive(
+    mapping = ggplot2::aes(
+      tooltip = sprintf(
+        "%s\nweighted_complexity: %.2f\ndryness: %.3f",
+        filename, weighted_complexity, dryness
+      ),
+      data_id = id
+    ),
+    colour    = "white",
+    linewidth = 0.2
+  ) +
+  ggplot2::scale_fill_viridis_c(
+    name    = "DRYness\n(uloc / lines)",
+    option  = "viridis",
+    limits  = c(0, 1)
+  ) +
+  ggplot2::coord_equal() +
+  ggplot2::labs(
+    title    = "rlang R files (interactive)",
+    subtitle = "hover any circle for filename, weighted complexity, and DRYness"
+  ) +
+  ggplot2::theme_void(base_size = 11) +
+  ggplot2::theme(
+    plot.title      = ggplot2::element_text(face = "bold"),
+    legend.position = "right"
+  )
+
+ggiraph::girafe(
+  ggobj         = gg_interactive,
+  width_svg     = 7,
+  height_svg    = 5,
+  options       = list(
+    ggiraph::opts_hover(css  = "stroke:#1B2A41; stroke-width:1.5px;"),
+    ggiraph::opts_tooltip(opacity = 0.95)
+  )
+)
+```
+
+The largest circles are the highest-density branching files; comparing their hue tells you whether that complexity is concentrated in repetitive code (low DRYness, dark) or in mostly unique code (high DRYness, bright).
