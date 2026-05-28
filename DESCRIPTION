@@ -24,6 +24,7 @@ Suggests:
     knitr,
     packcircles,
     rmarkdown,
+    shadowtext,
     testthat (>= 3.0.0),
     tidyr,
     withr

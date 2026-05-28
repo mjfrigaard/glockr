@@ -117,26 +117,38 @@ ggplot2::ggplot(tidytop15cm,
 
 ## Complexity vs. DRYness as a circle pack
 
-Each circle is one R source file. **Circle area** is the file's `weighted_complexity` (complexity per 100 LOC), so files that pack more branching per line are larger. **Fill colour** is the file's `dryness` (`uloc / lines`); darker hues mean more duplication relative to physical line count, lighter hues mean more unique non-blank content.
+Each circle is one `.R` source file. The circle area is the file's `weighted_complexity` (complexity per 100 LOC), so files that pack more branching per line are larger. 
+
+The fill color is the file's `dryness` (`uloc / lines`); darker hues mean more duplication relative to physical line count, lighter hues mean more unique non-blank content.
 
 ```{r r_files_dryness}
 r_files <- scc_by_file(rlang_path, include_ext = "r", dryness = TRUE)
-# Drop files with zero weighted_complexity (nothing to size the circle by).
+```
+
+Drop files with zero weighted_complexity (nothing to size the circle by).
+
+```{r drop-r_files_dryness}
 r_files <- r_files[r_files$weighted_complexity > 0, ]
 str(r_files[, c("filename", "weighted_complexity", "dryness")])
 ```
 
-Compute the circle layout with `packcircles::circleProgressiveLayout()` (area-proportional sizing) and turn it into polygon vertices for `ggplot2`. Tag every polygon vertex with the filename, weighted complexity, and dryness it belongs to so the static and interactive plots can both render labels:
+Compute the circle layout with `packcircles::circleProgressiveLayout()` (area-proportional sizing) and turn it into polygon vertices for `ggplot2`. 
 
-```{r circle-pack-data}
-packing            <- packcircles::circleProgressiveLayout(
+Tag every polygon vertex with the filename, weighted complexity, and dryness it belongs to so the static and interactive plots can both render labels:
+
+```{r circle-pack-data-ProgressiveLayout}
+packing <- packcircles::circleProgressiveLayout(
   r_files$weighted_complexity, sizetype = "area"
 )
 packing$filename            <- r_files$filename
 packing$weighted_complexity <- r_files$weighted_complexity
 packing$dryness             <- r_files$dryness
+```
 
+```{r circle-pack-data-Vertices}
 polygons <- packcircles::circleLayoutVertices(packing, npoints = 60)
+# circleLayoutVertices() numbered the vertices by the row position of r_files 
+# polygons$id is being used as a row index into r_files (like a positional join)
 polygons$filename            <- r_files$filename[polygons$id]
 polygons$weighted_complexity <- r_files$weighted_complexity[polygons$id]
 polygons$dryness             <- r_files$dryness[polygons$id]
@@ -152,13 +164,15 @@ top_labels <- packing[order(-packing$weighted_complexity), ][seq_len(10), ]
 ggplot2::ggplot(polygons,
                 ggplot2::aes(x, y, group = id, fill = dryness)) +
   ggplot2::geom_polygon(colour = "white", linewidth = 0.2) +
-  ggplot2::geom_text(
+  shadowtext::geom_shadowtext(
     data    = top_labels,
     mapping = ggplot2::aes(x = x, y = y, label = filename),
     inherit.aes = FALSE,
-    size     = 3,
-    colour   = "white",
-    fontface = "bold"
+    size      = 3,
+    colour    = "#2B2B2B",     # Eames Charcoal (theme `secondary`)
+    bg.colour = "white",       # halo so dark text stays legible on dark fills
+    bg.r      = 0.15,
+    fontface  = "bold"
   ) +
   ggplot2::scale_fill_viridis_c(
     name    = "DRYness\n(uloc / lines)",
